@@ -139,7 +139,7 @@ function SkillSection({ title, subtitle, icon, skills, ownedIds, points, onBuy }
 
 export default function Shop() {
   const [tab, setTab] = useState('passive');
-  const [points, setPoints] = useState(1500);
+  const [points, setPoints] = useState(1600);
   const [toast, setToast] = useState('');
   const [inventory, setInventory] = useState({ passive: [], active: [] });
 
