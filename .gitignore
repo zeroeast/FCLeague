@@ -21,3 +21,6 @@ npm-debug.log*
 
 # 캐시
 .cache/
+
+# Vite 임시 파일
+*.timestamp-*.mjs

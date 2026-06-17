@@ -12,23 +12,24 @@ const navItems = [
 export default function Layout() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="sticky top-0 z-50 bg-bg-surface border-b border-border">
+      <header className="sticky top-0 z-50 bg-bg-surface/90 backdrop-blur border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center gap-8">
-          {/* 로고 */}
-          <span className="text-base font-bold whitespace-nowrap">⚽ FC온라인 리그</span>
+          <span className="text-base font-black tracking-tight">
+            <span className="text-gradient-green">FC</span>
+            <span className="text-text"> 온라인 리그</span>
+          </span>
 
-          {/* 네비게이션 */}
-          <nav className="flex gap-6 flex-1">
+          <nav className="flex gap-1 flex-1">
             {navItems.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 className={({ isActive }) =>
-                  `text-sm pb-1 border-b-2 transition-colors ${
+                  `text-sm px-3 py-1.5 rounded-md font-medium transition-all ${
                     isActive
-                      ? 'text-accent border-accent'
-                      : 'text-text border-transparent hover:text-accent'
+                      ? 'text-accent bg-accent/10'
+                      : 'text-muted hover:text-text hover:bg-bg-elevated'
                   }`
                 }
               >
@@ -37,10 +38,9 @@ export default function Layout() {
             ))}
           </nav>
 
-          {/* 로그인 버튼 */}
           <NavLink
             to="/login"
-            className="text-sm font-semibold px-3 py-1.5 bg-green hover:bg-green-hover rounded-md transition-colors"
+            className="text-sm font-bold px-4 py-1.5 bg-accent text-bg-base rounded-md hover:shadow-green-sm transition-all"
           >
             로그인
           </NavLink>
@@ -51,8 +51,9 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-border text-center text-muted text-xs py-4">
-        FC온라인 리그 © 2025
+      <footer className="border-t border-border text-center text-muted text-xs py-5">
+        <span className="text-gradient-green font-bold">FC온라인 리그</span>
+        <span className="ml-2">© 2025 — 우리들만의 리그</span>
       </footer>
     </div>
   );

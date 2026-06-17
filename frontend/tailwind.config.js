@@ -4,18 +4,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 사이트 다크 테마 팔레트
         bg: {
-          base: '#0d1117',
-          surface: '#161b22',
-          elevated: '#21262d',
+          base:     '#080c16',
+          surface:  '#0d1526',
+          elevated: '#141f35',
         },
-        border: '#30363d',
-        accent: '#58a6ff',
-        green: '#238636',
-        'green-hover': '#2ea043',
-        muted: '#8b949e',
-        text: '#e6edf3',
+        border:       '#1e2d45',
+        accent:       '#00d97e',
+        'accent-dim': '#00a85f',
+        muted:        '#5a7490',
+        text:         '#e2eaf5',
+        purple:       '#7c3aed',
+        'purple-dim': '#5b21b6',
+      },
+      backgroundImage: {
+        'hero-gradient':
+          'linear-gradient(135deg, #080c16 0%, #0a1628 40%, #0d1f3c 70%, #091a14 100%)',
+        'green-glow':
+          'radial-gradient(ellipse at center, rgba(0,217,126,0.15) 0%, transparent 70%)',
+        'card-gradient':
+          'linear-gradient(135deg, #0d1526 0%, #111e38 100%)',
+      },
+      boxShadow: {
+        'green-sm': '0 0 12px rgba(0,217,126,0.25)',
+        'green-md': '0 0 24px rgba(0,217,126,0.35)',
+        'purple-sm': '0 0 12px rgba(124,58,237,0.3)',
       },
     },
   },

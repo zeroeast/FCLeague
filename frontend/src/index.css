@@ -3,18 +3,36 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
-
+  * { box-sizing: border-box; }
   body {
-    @apply bg-bg-base text-text;
+    background-color: #080c16;
+    color: #e2eaf5;
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
     min-height: 100vh;
   }
+  a { color: inherit; text-decoration: none; }
+}
 
-  a {
-    color: inherit;
-    text-decoration: none;
+@layer utilities {
+  .card-hover {
+    transition: all 0.25s ease;
+    border: 1px solid #1e2d45;
+  }
+  .card-hover:hover {
+    border-color: #00d97e;
+    box-shadow: 0 0 20px rgba(0, 217, 126, 0.2), 0 4px 24px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+  }
+  .text-gradient-green {
+    background: linear-gradient(90deg, #00d97e, #00ffaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-purple {
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
