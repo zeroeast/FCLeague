@@ -15,7 +15,7 @@ export default function Layout() {
     <div className="portal-app-shell flex flex-col min-h-screen">
       <header className="sticky top-0 z-50 portal-header">
         <div className="portal-topline">
-          <div className="max-w-7xl mx-auto px-6 h-12 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
             <span className="text-sm font-medium text-[#1f2c45]">☰ 메뉴</span>
             <span className="portal-wordmark">GAME PORTAL</span>
             <NavLink
@@ -28,9 +28,9 @@ export default function Layout() {
         </div>
 
         <div className="portal-mainline">
-          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
+          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center gap-6">
             <span className="text-lg font-black tracking-tight text-[#0b1b33]">FC ONLINE LEAGUE</span>
-            <nav className="flex flex-1">
+            <nav className="portal-nav-grid flex-1">
               {navItems.map(({ to, label }) => (
                 <NavLink
                   key={to}

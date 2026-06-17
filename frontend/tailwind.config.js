@@ -5,15 +5,15 @@ export default {
     extend: {
       colors: {
         bg: {
-          base:     '#f1f4f8',
-          surface:  '#ffffff',
-          elevated: '#eef4ff',
+          base:     '#080c16',
+          surface:  '#0d1526',
+          elevated: '#141f35',
         },
-        border:       '#d1dbe8',
+        border:       '#1e2d45',
         accent:       '#16f06a',
         'accent-dim': '#0f8f6b',
-        muted:        '#5c6e89',
-        text:         '#132844',
+        muted:        '#8aa1bd',
+        text:         '#e2eaf5',
         purple:       '#7c3aed',
         'purple-dim': '#5b21b6',
       },
