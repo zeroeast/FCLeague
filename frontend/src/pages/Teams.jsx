@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Emblem } from '../components/Emblem.jsx';
 import { PlayerSlot } from '../components/PlayerSlot.jsx';
+import { pickAbilitiesByName } from '../constants/managerTraits.js';
 
 const MANAGERS = [
   { name:'영동', formation:'4-3-3',   ovr:91, pts:28,
@@ -26,101 +27,80 @@ const POS = ['ST','RW','LW','CAM','CM','CM','RB','CB','CB','LB','GK'];
 /** Sample OVR per slot until API provides real values */
 const SLOT_OVR = [97, 93, 92, 91, 91, 91, 88, 90, 89, 87, 90];
 
-const ABILITY_POOL = [
-  {
-    id: 'ban-player',
-    name: '선수 밴 능력',
-    cost: 10,
-    description: '상대방 선수진 중 1명을 벤(출전 불가) 처리합니다. 사용 시 특성은 즉시 소모됩니다.',
-    oneShot: true,
-  },
-  {
-    id: 'reduce-squad',
-    name: '선수단 감소 능력',
-    cost: 20,
-    description: '상대방 선수단 등록 가능 인원을 10명으로 제한합니다. 사용 시 특성은 소모됩니다.',
-    oneShot: true,
-  },
-  {
-    id: 'training-coach',
-    name: '능숙한 훈련감독',
-    cost: null,
-    description: '총 n명의 선수에게 훈련 코치를 부착할 수 있습니다. n은 시즌 규칙에 따라 결정됩니다.',
-    oneShot: false,
-  },
-  {
-    id: 'set-piece-master',
-    name: '세트피스 설계자',
-    cost: 8,
-    description: '세트피스 상황에서 OVR 보정 +2를 적용합니다. 경기당 1회 발동 가능한 소모형 효과입니다.',
-    oneShot: true,
-  },
-  {
-    id: 'rapid-recovery',
-    name: '초고속 회복 루틴',
-    cost: 6,
-    description: '연전 구간에서 주전 2명의 컨디션 하락 페널티를 무효화합니다. 사용 후 소모됩니다.',
-    oneShot: true,
-  },
-  {
-    id: 'analysis-room',
-    name: '전술 분석실',
-    cost: null,
-    description: '상대 포메이션 정보를 바탕으로 추천 전술 프리셋 1개를 제공하는 지속형 특성입니다.',
-    oneShot: false,
-  },
-  {
-    id: 'rookie-eye',
-    name: '루키 발굴의 눈',
-    cost: null,
-    description: 'OVR 85 이하 선수에게 잠재 보너스를 부여해 특정 경기에서 체감 성능이 상승합니다.',
-    oneShot: false,
-  },
-  {
-    id: 'captain-aura',
-    name: '캡틴 오라',
-    cost: 12,
-    description: '주장 1명의 멘탈 보정을 통해 후반 집중력 보너스를 부여합니다. 사용 시 소모됩니다.',
-    oneShot: true,
-  },
-];
+function AbilityCard({ ability }) {
+  const costLabel = ability.cost ? `${ability.cost}P` : '지속형';
+  const typeLabel = ability.oneShot ? '소모형' : '패시브';
 
-function pickAbilitiesByName(name, count = 3) {
-  const chars = Array.from(name);
-  const seed = chars.reduce((acc, c, idx) => acc + c.charCodeAt(0) * (idx + 1), 0);
-  const picked = [];
-  for (let i = 0; i < ABILITY_POOL.length && picked.length < count; i += 1) {
-    const index = (seed + i * 3) % ABILITY_POOL.length;
-    const candidate = ABILITY_POOL[index];
-    if (!picked.some((ability) => ability.id === candidate.id)) {
-      picked.push(candidate);
-    }
-  }
-  return picked;
-}
-
-function AbilityChip({ ability }) {
   return (
     <div className="relative group">
       <div
-        className="px-3 py-2 rounded-lg border cursor-default"
-        style={{ background: 'rgba(255,255,255,.03)', borderColor: '#1e2d45' }}
+        className="flex gap-3 p-3 border cursor-default transition-all group-hover:-translate-y-0.5"
+        style={{
+          background: `linear-gradient(135deg, rgba(255,255,255,0.04) 0%, ${ability.glow} 120%)`,
+          borderColor: `${ability.accent}66`,
+          boxShadow: `inset 3px 0 0 ${ability.accent}, 0 0 0 1px rgba(255,255,255,0.03)`,
+        }}
       >
-        <p className="text-xs font-black text-text">{ability.name}</p>
-        <p className="text-[11px] text-muted mt-0.5">
-          {ability.cost ? `${ability.cost}P` : '패시브'} · {ability.oneShot ? '소모형' : '지속형'}
-        </p>
+        <div
+          className="w-11 h-11 shrink-0 flex items-center justify-center text-[10px] font-black tracking-wider"
+          style={{
+            background: `${ability.accent}22`,
+            border: `1px solid ${ability.accent}`,
+            color: ability.accent,
+            boxShadow: `0 0 12px ${ability.glow}`,
+          }}
+        >
+          {ability.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-sm font-black text-text leading-tight">{ability.name}</p>
+            <span
+              className="shrink-0 px-2 py-0.5 text-[10px] font-black"
+              style={{
+                background: ability.cost ? `${ability.accent}22` : 'rgba(0,217,126,0.12)',
+                color: ability.cost ? ability.accent : '#00d97e',
+                border: `1px solid ${ability.cost ? ability.accent : '#00d97e'}55`,
+              }}
+            >
+              {costLabel}
+            </span>
+          </div>
+          <p className="text-[11px] text-muted mt-1 line-clamp-2">{ability.description}</p>
+          <p className="text-[10px] font-bold mt-1.5 uppercase tracking-wider" style={{ color: ability.accent }}>
+            {typeLabel}
+            {ability.coachSlots ? ` · 코치 ${ability.coachSlots}명` : ''}
+          </p>
+        </div>
       </div>
+
       <div
-        className="absolute right-0 top-full mt-2 w-72 p-3 rounded-lg border opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition"
-        style={{ background: '#0a1426', borderColor: '#2a3c5c', zIndex: 20, boxShadow: '0 8px 20px rgba(0,0,0,.45)' }}
+        className="absolute right-0 top-full mt-2 w-80 p-4 border opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition z-30"
+        style={{
+          background: 'linear-gradient(180deg, #0f1a2e 0%, #0a1220 100%)',
+          borderColor: `${ability.accent}88`,
+          boxShadow: `0 12px 32px rgba(0,0,0,0.55), 0 0 24px ${ability.glow}`,
+        }}
       >
-        <p className="text-xs font-black text-accent mb-1">{ability.name}</p>
-        <p className="text-[12px] text-text leading-relaxed">{ability.description}</p>
-        <p className="text-[11px] text-muted mt-2">
-          타입: {ability.oneShot ? '소모형 (사용 시 사라짐)' : '지속형'}
-          {ability.cost ? ` · 비용: ${ability.cost}P` : ''}
-        </p>
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className="px-2 py-0.5 text-[10px] font-black"
+            style={{ background: `${ability.accent}33`, color: ability.accent, border: `1px solid ${ability.accent}` }}
+          >
+            {ability.icon}
+          </span>
+          <p className="text-sm font-black" style={{ color: ability.accent }}>{ability.name}</p>
+        </div>
+        <p className="text-[13px] text-text leading-relaxed">{ability.description}</p>
+        {ability.detail && (
+          <p className="text-[12px] mt-2 leading-relaxed" style={{ color: '#c7d4e8' }}>
+            {ability.detail}
+          </p>
+        )}
+        <div className="mt-3 pt-2 border-t border-border/60 flex justify-between text-[11px]">
+          <span className="text-muted">타입: {ability.oneShot ? '소모형 (사용 시 사라짐)' : '지속형'}</span>
+          {ability.cost && <span className="font-black" style={{ color: ability.accent }}>{ability.cost}P</span>}
+        </div>
       </div>
     </div>
   );
@@ -131,7 +111,7 @@ export default function Teams() {
   const managerAbilities = useMemo(() => {
     const map = {};
     MANAGERS.forEach((manager) => {
-      map[manager.name] = pickAbilitiesByName(manager.name, 3);
+      map[manager.name] = pickAbilitiesByName(manager.name);
     });
     return map;
   }, []);
@@ -175,15 +155,28 @@ export default function Teams() {
                 <p className="text-sm text-muted">{selected.formation} · OVR {selected.ovr}</p>
               </div>
             </div>
-            <div className="space-y-2 min-w-[300px]">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted uppercase tracking-widest font-bold">감독 특성</p>
-                <button onClick={() => setSelected(null)} className="text-muted hover:text-text text-2xl w-8 h-8 flex items-center justify-center">x</button>
-              </div>
-              <div className="grid grid-cols-1 gap-2">
-                {(managerAbilities[selected.name] ?? []).map((ability) => (
-                  <AbilityChip key={`${selected.name}-${ability.id}`} ability={ability} />
-                ))}
+            <div className="min-w-[320px]">
+              <div
+                className="p-4 border space-y-3"
+                style={{
+                  background: 'linear-gradient(160deg, rgba(0,217,126,0.06) 0%, rgba(13,21,38,0.95) 45%)',
+                  borderColor: 'rgba(0,217,126,0.25)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] text-accent uppercase tracking-[0.2em] font-bold">Manager Trait</p>
+                    <p className="text-sm font-black text-text">감독 특성</p>
+                  </div>
+                  <button onClick={() => setSelected(null)} className="text-muted hover:text-text text-2xl w-8 h-8 flex items-center justify-center">×</button>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {(managerAbilities[selected.name] ?? []).map((ability) => (
+                    <AbilityCard key={`${selected.name}-${ability.id}`} ability={ability} />
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted text-center pt-1">카드에 마우스를 올리면 상세 설명이 표시됩니다</p>
               </div>
             </div>
           </div>

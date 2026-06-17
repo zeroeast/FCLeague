@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import League from './pages/League.jsx';
+import TraitsInvestment from './pages/TraitsInvestment.jsx';
 import Teams from './pages/Teams.jsx';
 import Players from './pages/Players.jsx';
 import Stats from './pages/Stats.jsx';
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="league" element={<League />} />
+        <Route path="traits" element={<TraitsInvestment />} />
         <Route path="teams" element={<Teams />} />
         <Route path="players" element={<Players />} />
         <Route path="stats" element={<Stats />} />
