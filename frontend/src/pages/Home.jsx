@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Emblem } from '../components/Emblem.jsx';
 
 const STANDINGS = [
   { rank:1, name:'영동',  w:9, d:1, l:0, gf:34, ga:8,  pts:28 },
@@ -20,7 +21,6 @@ const RECENT = [
 const UPCOMING = [
   { home:'영동', away:'종성', date:'07-06' },
   { home:'준현', away:'민혁', date:'07-06' },
-  { home:'삼주', away:'진수', date:'07-13' },
 ];
 
 const TOP_SCORERS = [
@@ -48,8 +48,6 @@ export default function Home() {
           style={{ background:'radial-gradient(ellipse at 0% 50%, rgba(0,217,126,0.08) 0%, transparent 60%)' }} />
 
         <div className="relative flex flex-col md:flex-row md:items-center gap-6">
-
-          {/* 시즌 정보 */}
           <div className="shrink-0 space-y-1 md:border-r md:border-border md:pr-6">
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-bold">
@@ -62,12 +60,11 @@ export default function Home() {
             <p className="text-xs text-muted">2025.06.01 ~ 2025.09.30</p>
           </div>
 
-          {/* 핵심 수치 */}
           <div className="flex gap-6 md:border-r md:border-border md:pr-6">
             {[
               { label:'참가 감독', value:'8명' },
               { label:'진행 경기', value:`${totalPlayed}경기` },
-              { label:'총 득점', value:`${totalGoals}골` },
+              { label:'총 득점',   value:`${totalGoals}골` },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
                 <p className="text-2xl font-black text-accent">{value}</p>
@@ -76,12 +73,8 @@ export default function Home() {
             ))}
           </div>
 
-          {/* 선두 */}
           <div className="flex items-center gap-3 md:border-r md:border-border md:pr-6">
-            <div className="w-11 h-11 rounded-full flex items-center justify-center font-black text-lg"
-              style={{ background:'rgba(255,215,0,0.12)', border:'2px solid #FFD700', color:'#FFD700' }}>
-              {top.name[0]}
-            </div>
+            <Emblem name={top.name} size={56} />
             <div>
               <p className="text-xs text-muted">현재 1위</p>
               <p className="font-black text-base" style={{ color:'#FFD700' }}>{top.name}</p>
@@ -89,10 +82,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 다음 경기 */}
           <div className="flex-1 space-y-1.5">
             <p className="text-xs text-muted uppercase tracking-widest font-bold">다음 경기</p>
-            {UPCOMING.slice(0, 2).map((m, i) => (
+            {UPCOMING.map((m, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
                 <span className="text-xs text-muted w-10 shrink-0">{m.date}</span>
                 <span className="font-bold">{m.home}</span>
@@ -117,7 +109,8 @@ export default function Home() {
             <thead>
               <tr className="text-muted text-xs border-b border-border">
                 <th className="px-4 py-2 text-left w-6">#</th>
-                <th className="px-4 py-2 text-left">감독</th>
+                <th className="px-3 py-2 text-left w-10"></th>
+                <th className="px-2 py-2 text-left">감독</th>
                 <th className="px-3 py-2 text-center">승</th>
                 <th className="px-3 py-2 text-center">무</th>
                 <th className="px-3 py-2 text-center">패</th>
@@ -131,12 +124,15 @@ export default function Home() {
                   <tr key={s.rank}
                     className="border-b border-border/40 hover:bg-bg-elevated/40 transition-colors"
                     style={{ borderLeft: rc ? `3px solid ${rc}` : '3px solid transparent' }}>
-                    <td className="px-4 py-2.5 text-muted font-bold text-xs">{s.rank}</td>
-                    <td className="px-4 py-2.5 font-bold" style={{ color: rc || '#e2eaf5' }}>{s.name}</td>
-                    <td className="px-3 py-2.5 text-center text-accent">{s.w}</td>
-                    <td className="px-3 py-2.5 text-center text-muted">{s.d}</td>
-                    <td className="px-3 py-2.5 text-center text-red-400">{s.l}</td>
-                    <td className="px-3 py-2.5 text-center font-black text-text">{s.pts}</td>
+                    <td className="px-4 py-2 text-muted font-bold text-xs">{s.rank}</td>
+                    <td className="px-2 py-1">
+                      <Emblem name={s.name} size={28} />
+                    </td>
+                    <td className="px-2 py-2 font-bold" style={{ color: rc || '#e2eaf5' }}>{s.name}</td>
+                    <td className="px-3 py-2 text-center text-accent">{s.w}</td>
+                    <td className="px-3 py-2 text-center text-muted">{s.d}</td>
+                    <td className="px-3 py-2 text-center text-red-400">{s.l}</td>
+                    <td className="px-3 py-2 text-center font-black text-text">{s.pts}</td>
                   </tr>
                 );
               })}
@@ -145,8 +141,6 @@ export default function Home() {
         </section>
 
         <div className="space-y-4">
-
-          {/* 최근 경기 */}
           <section className="rounded-2xl border border-border p-5"
             style={{ background:'linear-gradient(135deg, #0d1526, #111e38)' }}>
             <div className="flex items-center justify-between mb-4">
@@ -165,7 +159,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* 득점 순위 */}
           <section className="rounded-2xl border border-border p-5"
             style={{ background:'linear-gradient(135deg, #0d1526, #111e38)' }}>
             <div className="flex items-center justify-between mb-4">
