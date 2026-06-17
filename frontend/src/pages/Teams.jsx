@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Emblem } from '../components/Emblem.jsx';
+import { PlayerSlot } from '../components/PlayerSlot.jsx';
 
 const MANAGERS = [
   { name:'영동', formation:'4-3-3',   ovr:91, pts:28,
@@ -21,6 +22,9 @@ const MANAGERS = [
 ];
 
 const POS = ['ST','RW','LW','CAM','CM','CM','RB','CB','CB','LB','GK'];
+
+/** Sample OVR per slot until API provides real values */
+const SLOT_OVR = [97, 93, 92, 91, 91, 91, 88, 90, 89, 87, 90];
 
 export default function Teams() {
   const [selected, setSelected] = useState(null);
@@ -71,11 +75,12 @@ export default function Teams() {
             <p className="text-xs text-muted uppercase tracking-widest mb-3 font-bold">Best 11</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {selected.best11.map((player, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-lg px-3 py-2"
-                  style={{ background:'rgba(0,217,126,0.05)', border:'1px solid #1e2d45' }}>
-                  <span className="text-xs font-bold w-10 shrink-0" style={{ color:'#5a7490' }}>{POS[i]}</span>
-                  <span className="text-sm font-medium text-text truncate">{player}</span>
-                </div>
+                <PlayerSlot
+                  key={i}
+                  name={player}
+                  pos={POS[i]}
+                  ovr={SLOT_OVR[i]}
+                />
               ))}
             </div>
           </div>

@@ -36,3 +36,68 @@
     background-clip: text;
   }
 }
+
+@keyframes enhance-glow-pulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes enhance-ring-expand {
+  0% {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--enh-color, #ffd700) 40%, transparent);
+  }
+  40% {
+    box-shadow:
+      0 0 60px color-mix(in srgb, var(--enh-color, #ffd700) 75%, transparent),
+      0 0 100px rgba(251, 191, 36, 0.45),
+      0 0 140px rgba(139, 92, 246, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 40px color-mix(in srgb, var(--enh-color, #ffd700) 50%, transparent);
+  }
+}
+
+@keyframes enhance-success-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.1); }
+  100% { transform: scale(1.03); }
+}
+
+@keyframes success-text-glow {
+  0%, 100% { text-shadow: 0 0 12px currentColor; filter: brightness(1); }
+  50% { text-shadow: 0 0 32px currentColor, 0 0 48px rgba(255, 215, 0, 0.6); filter: brightness(1.25); }
+}
+
+.anim-enhance-glow {
+  background: radial-gradient(
+    ellipse at 50% 45%,
+    rgba(255, 215, 0, 0.55) 0%,
+    rgba(139, 92, 246, 0.35) 35%,
+    rgba(251, 191, 36, 0.15) 55%,
+    transparent 75%
+  );
+  animation: enhance-glow-pulse 1.2s ease-in-out infinite;
+}
+
+.anim-enhance-success {
+  animation: enhance-ring-expand 1.4s ease-out forwards, enhance-success-pop 0.6s ease-out forwards;
+}
+
+.anim-success-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.12) 0%,
+    rgba(139, 92, 246, 0.18) 50%,
+    rgba(255, 215, 0, 0.1) 100%
+  );
+}
+
+.anim-success-text {
+  animation: success-text-glow 1s ease-in-out infinite;
+}

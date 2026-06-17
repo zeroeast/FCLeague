@@ -1,4 +1,7 @@
 import { useState, useRef } from 'react';
+import { PlayerCard } from '../components/PlayerCard.jsx';
+import { PlayerSlot } from '../components/PlayerSlot.jsx';
+import { getEnhanceColor, getOvrSlotStyle, getPositionColor } from '../constants/playerColors.js';
 
 // ── 상수 ──────────────────────────────────────────────────────────────────────
 const RARITY = {
@@ -93,24 +96,6 @@ function TabBtn({ id, label, active, onClick }) {
   );
 }
 
-function PlayerCard({ player, rarity, large }) {
-  return (
-    <div className={`${large?'w-44 h-60':'w-40 h-56'} rounded-2xl flex flex-col items-center justify-center gap-2 select-none relative overflow-hidden`}
-      style={{ background:`linear-gradient(135deg,#0a1628,${rarity.bg})`, border:`2px solid ${rarity.color}`, boxShadow:`0 0 40px ${rarity.glow}` }}>
-      <span className="text-xs font-bold uppercase tracking-widest" style={{ color:'#5a7490' }}>{player.nation}</span>
-      <span className="text-xs font-bold uppercase tracking-widest" style={{ color:rarity.color }}>{player.pos}</span>
-      <span className="text-xl font-black text-center px-2" style={{ color:'#e2eaf5' }}>{player.name}</span>
-      <span className="text-4xl font-black" style={{ color:rarity.color }}>{player.ovr}</span>
-      <span className="text-xs font-black px-3 py-0.5 rounded-full"
-        style={{ background:rarity.bg, color:rarity.color, border:`1px solid ${rarity.color}` }}>
-        {rarity.label}
-      </span>
-      <span className="text-xs" style={{ color:'#5a7490' }}>{player.club}</span>
-    </div>
-  );
-}
-
-// ── 메인 ──────────────────────────────────────────────────────────────────────
 export default function Gacha() {
   const [tab, setTab]       = useState('draw');
   const [points, setPoints] = useState(2000);
@@ -124,14 +109,12 @@ export default function Gacha() {
         @keyframes card-float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
         @keyframes spin-flicker { 0%,100%{opacity:1} 50%{opacity:.3} }
         @keyframes card-shake   { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-5px,1px) rotate(-2deg)} 40%{transform:translate(5px,-1px) rotate(2deg)} 60%{transform:translate(-4px,0) rotate(-1deg)} 80%{transform:translate(4px,0) rotate(1deg)} }
-        @keyframes success-pop  { 0%{transform:scale(1)} 40%{transform:scale(1.08)} 100%{transform:scale(1)} }
         @keyframes shuffle-spin { 0%{transform:rotate(0) scale(1)} 50%{transform:rotate(180deg) scale(1.15)} 100%{transform:rotate(360deg) scale(1)} }
         @keyframes fade-in      { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         .anim-reveal  { animation:card-reveal  .6s cubic-bezier(.34,1.56,.64,1) forwards }
         .anim-float   { animation:card-float   3s ease-in-out infinite }
         .anim-flicker { animation:spin-flicker .14s ease-in-out infinite }
         .anim-shake   { animation:card-shake   .35s ease-in-out infinite }
-        .anim-success { animation:success-pop  .5s ease-out forwards }
         .anim-shuffle { animation:shuffle-spin .7s ease-in-out infinite }
         .anim-fadein  { animation:fade-in      .4s ease-out forwards }
       `}</style>
@@ -225,7 +208,11 @@ function DrawSection({ points, setPoints }) {
             </div>
           </div>
         )}
-        {phase==='spinning' && <div className="anim-flicker"><PlayerCard player={displayP} rarity={RARITY[displayP.rarity]} /></div>}
+        {phase==='spinning' && (
+          <div className="anim-flicker">
+            <PlayerCard player={displayP} rarity={RARITY[displayP.rarity]} />
+          </div>
+        )}
         {phase==='result' && result && (
           <div className="anim-reveal relative overflow-hidden rounded-2xl">
             <div className="absolute inset-0 pointer-events-none z-10 rounded-2xl overflow-hidden">
@@ -266,7 +253,7 @@ function EnhanceSection({ points, setPoints }) {
   const player = squad.find(p => p.id === selId);
   const cfg    = player ? ENHANCE_TABLE.find(e => e.lv === player.enhance) : null;
   const maxed  = player && player.enhance >= 11;
-  const enhColor = (lv) => lv >= 10 ? '#FFD700' : lv >= 8 ? '#a855f7' : '#00d97e';
+  const enhBorder = player ? getEnhanceColor(player.enhance) : null;
 
   const tryEnhance = () => {
     if (!player || !cfg || points < cfg.cost || phase !== 'idle') return;
@@ -286,56 +273,37 @@ function EnhanceSection({ points, setPoints }) {
         <p className="text-xs text-muted uppercase tracking-widest font-bold mb-3">내 선수단</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {squad.map(p => (
-            <button key={p.id} onClick={() => phase==='idle' && setSelId(p.id)}
-              className="rounded-xl p-3 text-left transition-all"
-              style={{ background:selId===p.id?'rgba(0,217,126,.1)':'rgba(255,255,255,.03)', border:`1px solid ${selId===p.id?'#00d97e':'#1e2d45'}` }}>
-              <div className="flex justify-between mb-1">
-                <span className="text-xs font-bold" style={{ color:'#5a7490' }}>{p.pos}</span>
-                <span className="text-xs font-black" style={{ color:enhColor(p.enhance) }}>+{p.enhance}</span>
-              </div>
-              <p className="font-bold text-sm text-text">{p.name}</p>
-              <p className="text-xs text-muted">OVR {p.ovr}</p>
-            </button>
+            <PlayerSlot
+              key={p.id}
+              name={p.name}
+              pos={p.pos}
+              ovr={p.ovr}
+              enhance={p.enhance}
+              selected={selId === p.id}
+              onClick={phase === 'idle' ? () => setSelId(p.id) : undefined}
+            />
           ))}
         </div>
       </div>
 
       {player && (
         <div className="rounded-2xl border overflow-hidden anim-fadein"
-          style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', borderColor:`${enhColor(player.enhance)}44` }}>
+          style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', borderColor:`${enhBorder}44` }}>
           <div className="p-6 flex flex-col items-center gap-5">
+            <PlayerCard
+              player={player}
+              enhanceLevel={player.enhance}
+              phase={phase}
+              large
+            />
 
-            {/* 선수 카드 */}
-            <div className={`w-48 h-64 rounded-2xl flex flex-col items-center justify-center gap-3 relative overflow-hidden select-none transition-all
-              ${phase==='trying'?'anim-shake':phase==='success'?'anim-success':''}`}
-              style={{
-                background:`linear-gradient(135deg,#0a1628,${enhColor(player.enhance)}11)`,
-                border:`2px solid ${phase==='fail'?'#ef4444':enhColor(player.enhance)}`,
-                boxShadow:phase==='success'?`0 0 60px ${enhColor(player.enhance)},0 0 30px ${enhColor(player.enhance)}88`:phase==='fail'?'0 0 30px rgba(239,68,68,.5)':`0 0 24px ${enhColor(player.enhance)}55`,
-              }}>
-              <span className="text-xs uppercase tracking-widest font-bold" style={{ color:'#5a7490' }}>{player.pos}</span>
-              <span className="text-2xl font-black" style={{ color:'#e2eaf5' }}>{player.name}</span>
-              <span className="text-5xl font-black transition-all" style={{ color:enhColor(player.enhance) }}>+{player.enhance}</span>
-              <span className="text-sm text-muted">OVR {player.ovr}</span>
-
-              {phase==='success' && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-2xl" style={{ background:'rgba(0,217,126,.18)' }}>
-                  <span className="text-3xl font-black" style={{ color:'#00d97e', textShadow:'0 0 20px #00d97e' }}>SUCCESS</span>
-                </div>
-              )}
-              {phase==='fail' && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-2xl" style={{ background:'rgba(239,68,68,.18)' }}>
-                  <span className="text-3xl font-black text-red-400" style={{ textShadow:'0 0 20px rgba(239,68,68,.8)' }}>FAIL</span>
-                </div>
-              )}
-            </div>
-
-            {/* 강화 정보 */}
             {!maxed && cfg && (
               <div className="w-full rounded-xl p-4 space-y-3" style={{ background:'rgba(255,255,255,.04)', border:'1px solid #1e2d45' }}>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted">목표 강화</span>
-                  <span className="font-black" style={{ color:enhColor(player.enhance+1) }}>+{player.enhance} → +{player.enhance+1}</span>
+                  <span className="font-black" style={{ color:getEnhanceColor(player.enhance + 1) }}>
+                    +{player.enhance} → +{player.enhance + 1}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted">성공 확률</span>
@@ -479,12 +447,18 @@ function ShuffleSection({ points, setPoints }) {
                   <span className="text-xs text-muted">{result[m].length}명</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {result[m].length ? result[m].map((p,i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ background:'rgba(0,217,126,.08)', color:'#00d97e', border:'1px solid rgba(0,217,126,.2)' }}>
-                      {p.name} <span style={{ color:'#5a7490' }}>{p.ovr}</span>
-                    </span>
-                  )) : <span className="text-xs text-muted">배분 없음</span>}
+                  {result[m].length ? result[m].map((p,i) => {
+                    const slot = getOvrSlotStyle(p.ovr);
+                    const posColor = getPositionColor(p.pos);
+                    return (
+                      <span key={i} className="text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1"
+                        style={{ background:slot.background, color:slot.nameColor, border:`1px solid ${slot.border}` }}>
+                        {p.name}
+                        <span className="font-black" style={{ color:slot.accent }}>{p.ovr}</span>
+                        <span className="w-0.5 h-3 rounded-full inline-block" style={{ background:posColor }} />
+                      </span>
+                    );
+                  }) : <span className="text-xs text-muted">배분 없음</span>}
                 </div>
               </div>
             ))}
