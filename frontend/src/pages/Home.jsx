@@ -40,56 +40,51 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-
-      {/* 리그 현황판 */}
-      <section className="relative rounded-2xl overflow-hidden p-6"
-        style={{ background:'linear-gradient(135deg, #0d1526 0%, #0d1f20 100%)', border:'1px solid rgba(0,217,126,0.25)' }}>
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background:'radial-gradient(ellipse at 0% 50%, rgba(0,217,126,0.08) 0%, transparent 60%)' }} />
-
+      <section className="portal-hero-banner p-6 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none portal-hero-overlay" />
         <div className="relative flex flex-col md:flex-row md:items-center gap-6">
-          <div className="shrink-0 space-y-1 md:border-r md:border-border md:pr-6">
+          <div className="shrink-0 space-y-1 md:border-r md:pr-6 border-[#86cbc6]">
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse inline-block" />
+              <span className="portal-live-pill-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#16f06a] animate-pulse inline-block" />
                 LIVE
               </span>
-              <span className="text-xs text-muted">시즌 1</span>
+              <span className="text-xs text-[#5c6e89]">시즌 1</span>
             </div>
-            <p className="text-2xl font-black text-text">리그 현황</p>
-            <p className="text-xs text-muted">2025.06.01 ~ 2025.09.30</p>
+            <p className="text-2xl font-black text-[#06152b]">리그 현황</p>
+            <p className="text-xs text-[#5c6e89]">2025.06.01 ~ 2025.09.30</p>
           </div>
 
-          <div className="flex gap-6 md:border-r md:border-border md:pr-6">
+          <div className="flex gap-6 md:border-r md:pr-6 border-[#86cbc6]">
             {[
               { label:'참가 감독', value:'8명' },
               { label:'진행 경기', value:`${totalPlayed}경기` },
               { label:'총 득점',   value:`${totalGoals}골` },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
-                <p className="text-2xl font-black text-accent">{value}</p>
-                <p className="text-xs text-muted mt-0.5">{label}</p>
+                <p className="text-2xl font-black text-[#0a2f5d]">{value}</p>
+                <p className="text-xs text-[#5c6e89] mt-0.5">{label}</p>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center gap-3 md:border-r md:border-border md:pr-6">
+          <div className="flex items-center gap-3 md:border-r md:pr-6 border-[#86cbc6]">
             <Emblem name={top.name} size={56} />
             <div>
-              <p className="text-xs text-muted">현재 1위</p>
-              <p className="font-black text-base" style={{ color:'#FFD700' }}>{top.name}</p>
-              <p className="text-xs text-muted">{top.pts}pt · {top.w}승</p>
+              <p className="text-xs text-[#5c6e89]">현재 1위</p>
+              <p className="font-black text-base" style={{ color:'#c49000' }}>{top.name}</p>
+              <p className="text-xs text-[#5c6e89]">{top.pts}pt · {top.w}승</p>
             </div>
           </div>
 
           <div className="flex-1 space-y-1.5">
-            <p className="text-xs text-muted uppercase tracking-widest font-bold">다음 경기</p>
+            <p className="text-xs text-[#4e667f] uppercase tracking-widest font-bold">다음 경기</p>
             {UPCOMING.map((m, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
-                <span className="text-xs text-muted w-10 shrink-0">{m.date}</span>
-                <span className="font-bold">{m.home}</span>
-                <span className="text-muted text-xs">vs</span>
-                <span className="font-bold">{m.away}</span>
+                <span className="text-xs text-[#5c6e89] w-10 shrink-0">{m.date}</span>
+                <span className="font-bold text-[#112744]">{m.home}</span>
+                <span className="text-[#5c6e89] text-xs">vs</span>
+                <span className="font-bold text-[#112744]">{m.away}</span>
               </div>
             ))}
           </div>
@@ -97,42 +92,37 @@ export default function Home() {
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* 순위표 */}
-        <section className="rounded-2xl border border-border overflow-hidden"
-          style={{ background:'linear-gradient(135deg, #0d1526, #111e38)' }}>
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-bold text-sm uppercase tracking-widest text-muted">순위표</h2>
-            <Link to="/league" className="text-xs text-accent hover:underline">전체 보기</Link>
+        <section className="portal-panel overflow-hidden border border-[#d1dbe8]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#d1dbe8] bg-[#eef4ff]">
+            <h2 className="font-bold text-sm uppercase tracking-widest text-[#27466c]">순위표</h2>
+            <Link to="/league" className="text-xs text-[#214a7a] hover:underline">전체 보기</Link>
           </div>
-          <table className="w-full text-sm">
+          <table className="w-full text-sm bg-white">
             <thead>
-              <tr className="text-muted text-xs border-b border-border">
+              <tr className="text-[#5c6e89] text-xs border-b border-[#d1dbe8]">
                 <th className="px-4 py-2 text-left w-6">#</th>
                 <th className="px-3 py-2 text-left w-10"></th>
                 <th className="px-2 py-2 text-left">감독</th>
                 <th className="px-3 py-2 text-center">승</th>
                 <th className="px-3 py-2 text-center">무</th>
                 <th className="px-3 py-2 text-center">패</th>
-                <th className="px-3 py-2 text-center font-bold text-text">승점</th>
+                <th className="px-3 py-2 text-center font-bold text-[#0f223d]">승점</th>
               </tr>
             </thead>
             <tbody>
               {STANDINGS.map((s) => {
                 const rc = RANK_COLOR(s.rank);
                 return (
-                  <tr key={s.rank}
-                    className="border-b border-border/40 hover:bg-bg-elevated/40 transition-colors"
-                    style={{ borderLeft: rc ? `3px solid ${rc}` : '3px solid transparent' }}>
-                    <td className="px-4 py-2 text-muted font-bold text-xs">{s.rank}</td>
+                  <tr key={s.rank} className="border-b border-[#e8eef7] hover:bg-[#f5f9ff] transition-colors" style={{ borderLeft: rc ? `3px solid ${rc}` : '3px solid transparent' }}>
+                    <td className="px-4 py-2 text-[#5c6e89] font-bold text-xs">{s.rank}</td>
                     <td className="px-2 py-1">
                       <Emblem name={s.name} size={28} />
                     </td>
-                    <td className="px-2 py-2 font-bold" style={{ color: rc || '#e2eaf5' }}>{s.name}</td>
-                    <td className="px-3 py-2 text-center text-accent">{s.w}</td>
-                    <td className="px-3 py-2 text-center text-muted">{s.d}</td>
-                    <td className="px-3 py-2 text-center text-red-400">{s.l}</td>
-                    <td className="px-3 py-2 text-center font-black text-text">{s.pts}</td>
+                    <td className="px-2 py-2 font-bold" style={{ color: rc || '#132844' }}>{s.name}</td>
+                    <td className="px-3 py-2 text-center text-[#0f8f6b]">{s.w}</td>
+                    <td className="px-3 py-2 text-center text-[#5c6e89]">{s.d}</td>
+                    <td className="px-3 py-2 text-center text-[#cf2f2f]">{s.l}</td>
+                    <td className="px-3 py-2 text-center font-black text-[#0f223d]">{s.pts}</td>
                   </tr>
                 );
               })}
@@ -141,45 +131,41 @@ export default function Home() {
         </section>
 
         <div className="space-y-4">
-          <section className="rounded-2xl border border-border p-5"
-            style={{ background:'linear-gradient(135deg, #0d1526, #111e38)' }}>
+          <section className="portal-panel border border-[#d1dbe8] p-5 bg-white">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-sm uppercase tracking-widest text-muted">최근 경기</h2>
-              <Link to="/league" className="text-xs text-accent hover:underline">전체 보기</Link>
+              <h2 className="font-bold text-sm uppercase tracking-widest text-[#27466c]">최근 경기</h2>
+              <Link to="/league" className="text-xs text-[#214a7a] hover:underline">전체 보기</Link>
             </div>
             <div className="space-y-2">
               {RECENT.map((m, i) => (
-                <div key={i} className="grid grid-cols-3 items-center text-sm rounded-lg px-3 py-2"
-                  style={{ background:'rgba(255,255,255,0.03)' }}>
-                  <span className="font-bold text-right pr-3">{m.home}</span>
-                  <span className="font-black text-center" style={{ color:'#00d97e' }}>{m.hs} - {m.as}</span>
-                  <span className="font-bold text-left pl-3">{m.away}</span>
+                <div key={i} className="grid grid-cols-3 items-center text-sm px-3 py-2 border border-[#dde6f2] bg-[#f8fbff]">
+                  <span className="font-bold text-right pr-3 text-[#132844]">{m.home}</span>
+                  <span className="font-black text-center text-[#0f8f6b]">{m.hs} - {m.as}</span>
+                  <span className="font-bold text-left pl-3 text-[#132844]">{m.away}</span>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border p-5"
-            style={{ background:'linear-gradient(135deg, #0d1526, #111e38)' }}>
+          <section className="portal-panel border border-[#d1dbe8] p-5 bg-white">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-sm uppercase tracking-widest text-muted">득점 순위 Top 5</h2>
-              <Link to="/stats" className="text-xs text-accent hover:underline">통계 보기</Link>
+              <h2 className="font-bold text-sm uppercase tracking-widest text-[#27466c]">득점 순위 Top 5</h2>
+              <Link to="/stats" className="text-xs text-[#214a7a] hover:underline">통계 보기</Link>
             </div>
             <div className="space-y-2.5">
               {TOP_SCORERS.map((s) => (
                 <div key={s.rank} className="flex items-center gap-3">
-                  <span className="w-5 text-center font-black text-xs shrink-0"
-                    style={{ color: RANK_COLOR(s.rank) || '#5a7490' }}>{s.rank}</span>
+                  <span className="w-5 text-center font-black text-xs shrink-0" style={{ color: RANK_COLOR(s.rank) || '#5a7490' }}>{s.rank}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-1">
-                      <span className="font-bold text-sm text-text">{s.player}</span>
-                      <span className="text-xs text-muted">({s.manager})</span>
+                      <span className="font-bold text-sm text-[#132844]">{s.player}</span>
+                      <span className="text-xs text-[#5c6e89]">({s.manager})</span>
                     </div>
-                    <div className="mt-1 h-1 rounded-full bg-bg-elevated overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width:`${(s.goals/14)*100}%`, background:'#00d97e' }} />
+                    <div className="mt-1 h-1 bg-[#d9e4f2] overflow-hidden">
+                      <div className="h-full" style={{ width:`${(s.goals/14)*100}%`, background:'#16f06a' }} />
                     </div>
                   </div>
-                  <span className="font-black text-accent shrink-0">{s.goals}골</span>
+                  <span className="font-black text-[#0f8f6b] shrink-0">{s.goals}골</span>
                 </div>
               ))}
             </div>
