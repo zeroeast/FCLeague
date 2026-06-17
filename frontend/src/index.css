@@ -267,3 +267,47 @@
   animation: gacha-jackpot-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
     gacha-impact-shake 0.4s ease-out 0.2s 1;
 }
+
+/* ── Enhance ritual — tension build + soul absorb ── */
+@keyframes enhance-soul-vibrate-kf {
+  0%, 100% { transform: scale(1) rotate(-5deg); }
+  20% { transform: scale(1.08) rotate(5deg) translate(2px, -2px); }
+  40% { transform: scale(0.95) rotate(-4deg) translate(-3px, 2px); }
+  60% { transform: scale(1.06) rotate(4deg) translate(2px, 3px); }
+  80% { transform: scale(0.98) rotate(-3deg) translate(-2px, -1px); }
+}
+
+@keyframes enhance-tension-shimmer-kf {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+@keyframes enhance-stage-shake-kf {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(calc(var(--enhance-shake, 3px) * -1), var(--enhance-shake, 3px)); }
+  40% { transform: translate(var(--enhance-shake, 3px), calc(var(--enhance-shake, 3px) * -0.6)); }
+  60% { transform: translate(calc(var(--enhance-shake, 3px) * -0.7), calc(var(--enhance-shake, 3px) * -1)); }
+  80% { transform: translate(calc(var(--enhance-shake, 3px) * 0.5), var(--enhance-shake, 3px)); }
+}
+
+@keyframes enhance-aura-pulse-kf {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+.enhance-soul-vibrate {
+  animation: enhance-soul-vibrate-kf 0.22s ease-in-out infinite;
+}
+
+.enhance-tension-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: enhance-tension-shimmer-kf 0.55s linear infinite;
+}
+
+.enhance-ritual-stage {
+  animation: enhance-stage-shake-kf 0.18s ease-in-out infinite;
+}
+
+.enhance-aura-pulse {
+  animation: enhance-aura-pulse-kf 0.9s ease-in-out infinite;
+}

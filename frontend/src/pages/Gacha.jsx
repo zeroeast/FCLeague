@@ -1,9 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { PlayerCard } from '../components/PlayerCard.jsx';
 import { PlayerSlot } from '../components/PlayerSlot.jsx';
 import { Emblem } from '../components/Emblem.jsx';
 import { PlayerName } from '../components/PlayerName.jsx';
+import EnhanceRitual, { buildSoulOrbs } from '../components/EnhanceRitual.jsx';
 import { getEnhanceColor, getEnhanceLabelStyle, getOvrSlotStyle, getPositionColor } from '../constants/playerColors.js';
+import {
+  ENHANCE_TRY_MS,
+  ENHANCE_RESULT_MS,
+  getTensionProgress,
+  pickTensionCurve,
+} from '../constants/enhanceTension.js';
 import { getCardSeason } from '../constants/seasonTags.js';
 import {
   MANAGER_NAMES,
@@ -382,15 +389,24 @@ function SoulSupportPanel({ currentUser, managerPoints, soulSupport, setSoulSupp
 }
 
 function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, fullWidth }) {
-  const [squad, setSquad]       = useState(INIT_SQUAD.map(p => ({...p})));
-  const [selId, setSelId]       = useState(null);
-  const [phase, setPhase]       = useState('idle');
+  const [squad, setSquad] = useState(INIT_SQUAD.map((p) => ({ ...p })));
+  const [selId, setSelId] = useState(null);
+  const [phase, setPhase] = useState('idle');
   const [soulSupport, setSoulSupport] = useState({});
-  const timer = useRef(null);
+  const [tryProgress, setTryProgress] = useState(0);
+  const [curveKey, setCurveKey] = useState('linear');
+  const [soulOrbs, setSoulOrbs] = useState([]);
 
-  const player = squad.find(p => p.id === selId);
-  const cfg    = player ? ENHANCE_TABLE.find(e => e.lv === player.enhance) : null;
-  const maxed  = player && player.enhance >= 11;
+  const rafRef = useRef(null);
+  const resultTimerRef = useRef(null);
+  const tryStartRef = useRef(0);
+  const outcomeRef = useRef(false);
+  const selIdRef = useRef(null);
+  const effectiveRateRef = useRef(0);
+
+  const player = squad.find((p) => p.id === selId);
+  const cfg = player ? ENHANCE_TABLE.find((e) => e.lv === player.enhance) : null;
+  const maxed = player && player.enhance >= 11;
   const enhBorder = player ? getEnhanceColor(player.enhance) : null;
 
   const totalSoul = Object.values(soulSupport).reduce((a, b) => a + b, 0);
@@ -399,9 +415,50 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
 
   const soulValid = Object.entries(soulSupport).every(([name, amt]) => amt <= managerPoints[name]);
 
+  useEffect(() => () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== 'trying') return undefined;
+
+    const tick = (now) => {
+      const elapsed = now - tryStartRef.current;
+      const progress = getTensionProgress(elapsed, ENHANCE_TRY_MS, curveKey);
+      setTryProgress(progress);
+
+      if (elapsed < ENHANCE_TRY_MS) {
+        rafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      const ok = outcomeRef.current;
+      setPhase(ok ? 'success' : 'fail');
+      if (ok) {
+        const id = selIdRef.current;
+        setSquad((sq) => sq.map((p) => (p.id === id ? { ...p, enhance: p.enhance + 1 } : p)));
+      }
+      resultTimerRef.current = setTimeout(() => {
+        setPhase('idle');
+        setTryProgress(0);
+        setSoulOrbs([]);
+      }, ENHANCE_RESULT_MS);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [phase, curveKey]);
+
   const tryEnhance = () => {
     if (!player || !cfg || points < cfg.cost || phase !== 'idle' || !soulValid) return;
+
     const pledged = { ...soulSupport };
+    outcomeRef.current = Math.random() * 100 < effectiveRate;
+    selIdRef.current = selId;
+    effectiveRateRef.current = effectiveRate;
 
     setManagerPoints((mp) => {
       const next = { ...mp, [currentUser]: mp[currentUser] - cfg.cost };
@@ -410,23 +467,23 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
       });
       return next;
     });
-    setSoulSupport({});
-    setPhase('trying');
 
-    timer.current = setTimeout(() => {
-      const ok = Math.random() * 100 < effectiveRate;
-      setPhase(ok ? 'success' : 'fail');
-      if (ok) setSquad(sq => sq.map(p => p.id === selId ? {...p, enhance:p.enhance+1} : p));
-      setTimeout(() => setPhase('idle'), 2200);
-    }, 1800);
+    setSoulOrbs(buildSoulOrbs(pledged));
+    setCurveKey(pickTensionCurve(Date.now() + (player?.id ?? 0) + totalSoul));
+    setSoulSupport({});
+    setTryProgress(0);
+    tryStartRef.current = performance.now();
+    setPhase('trying');
   };
+
+  const isTrying = phase === 'trying';
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-border p-4" style={{ background:'#0d1526' }}>
+      <div className="rounded-2xl border border-border p-4" style={{ background: '#0d1526' }}>
         <p className="text-xs text-muted uppercase tracking-widest font-bold mb-3">내 선수단</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {squad.map(p => (
+          {squad.map((p) => (
             <PlayerSlot
               key={p.id}
               name={p.name}
@@ -441,18 +498,41 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
       </div>
 
       {player && (
-        <div className={`rounded-2xl border overflow-hidden anim-fadein gacha-stage ${phase === 'trying' ? 'gacha-stage--spinning' : phase === 'success' ? 'gacha-stage--result' : ''}`}
-          style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', borderColor:`${enhBorder}66`, boxShadow: phase==='success' ? `0 0 60px ${enhBorder}88` : 'none' }}>
+        <div
+          className={`rounded-2xl border overflow-hidden anim-fadein gacha-stage ${isTrying ? 'gacha-stage--spinning' : phase === 'success' ? 'gacha-stage--result' : ''}`}
+          style={{
+            background: 'linear-gradient(135deg,#0d1526,#111e38)',
+            borderColor: `${enhBorder}66`,
+            boxShadow: phase === 'success' ? `0 0 60px ${enhBorder}88` : 'none',
+          }}
+        >
           <div className="p-6 flex flex-col items-center gap-5">
-            <PlayerCard
-              player={player}
-              enhanceLevel={player.enhance}
-              phase={phase}
-              large
-            />
+            {isTrying ? (
+              <EnhanceRitual
+                progress={tryProgress}
+                curveKey={curveKey}
+                soulOrbs={soulOrbs}
+                effectiveRate={effectiveRateRef.current}
+                soulBonus={soulOrbs.length > 0 ? calcSoulBonusRate(soulOrbs.length * SOUL_POINT_STEP) : 0}
+              >
+                <PlayerCard
+                  player={player}
+                  enhanceLevel={player.enhance}
+                  phase="trying"
+                  large
+                />
+              </EnhanceRitual>
+            ) : (
+              <PlayerCard
+                player={player}
+                enhanceLevel={player.enhance}
+                phase={phase}
+                large
+              />
+            )}
 
-            {!maxed && cfg && (
-              <div className="w-full rounded-xl p-4 space-y-3" style={{ background:'rgba(255,255,255,.04)', border:'1px solid #1e2d45' }}>
+            {!maxed && cfg && !isTrying && (
+              <div className="w-full rounded-xl p-4 space-y-3" style={{ background: 'rgba(255,255,255,.04)', border: '1px solid #1e2d45' }}>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted">목표 강화</span>
                   <span className="font-black" style={getEnhanceLabelStyle(player.enhance + 1)}>
@@ -473,8 +553,14 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
                   <span className="text-sm text-muted">최종 성공률</span>
                   <span className="font-black text-accent">{effectiveRate}%</span>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background:'#141f35' }}>
-                  <div className="h-full rounded-full transition-all" style={{ width:`${effectiveRate}%`, background: soulBonus > 0 ? 'linear-gradient(90deg,#a855f7,#00d97e)' : '#00d97e' }} />
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: '#141f35' }}>
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${effectiveRate}%`,
+                      background: soulBonus > 0 ? 'linear-gradient(90deg,#a855f7,#00d97e)' : '#00d97e',
+                    }}
+                  />
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted">내 강화 비용</span>
@@ -489,7 +575,7 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
               </div>
             )}
 
-            {!maxed && cfg && (
+            {!maxed && cfg && !isTrying && (
               <SoulSupportPanel
                 currentUser={currentUser}
                 managerPoints={managerPoints}
@@ -499,27 +585,44 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
               />
             )}
             {maxed && (
-              <div className="w-full text-center py-3 rounded-xl font-bold text-sm"
-                style={{ background:'rgba(255,215,0,.1)', color:'#FFD700', border:'1px solid rgba(255,215,0,.3)' }}>
+              <div
+                className="w-full text-center py-3 rounded-xl font-bold text-sm"
+                style={{ background: 'rgba(255,215,0,.1)', color: '#FFD700', border: '1px solid rgba(255,215,0,.3)' }}
+              >
                 MAX 강화 완료
               </div>
             )}
 
-            <button onClick={tryEnhance}
-              disabled={!cfg || maxed || phase!=='idle' || points<(cfg?.cost||0) || !soulValid}
+            <button
+              type="button"
+              onClick={tryEnhance}
+              disabled={!cfg || maxed || phase !== 'idle' || points < (cfg?.cost || 0) || !soulValid}
               className="w-full py-4 rounded-xl font-black text-lg transition-all"
               style={{
-                background: maxed?'#1e2d45': phase==='success'?'#00d97e': phase==='fail'?'rgba(239,68,68,.3)': cfg&&points>=cfg.cost&&phase==='idle'?'#00d97e':'#1e2d45',
-                color:      phase==='success'?'#080c16': phase==='fail'?'#ef4444': cfg&&points>=(cfg?.cost||0)&&phase==='idle'&&!maxed?'#080c16':'#5a7490',
-                cursor:     !cfg||maxed||phase!=='idle'||points<(cfg?.cost||0)?'not-allowed':'pointer',
-              }}>
-              {phase==='trying'?'강화 중...': phase==='success'?`+${player.enhance} 강화 성공!`: phase==='fail'?'강화 실패...': maxed?'MAX 강화': !cfg?'강화 불가': points<cfg.cost?'포인트 부족': `강화 시도 (${cfg.cost.toLocaleString()}P)`}
+                background: maxed ? '#1e2d45' : phase === 'success' ? '#00d97e' : phase === 'fail' ? 'rgba(239,68,68,.3)' : cfg && points >= cfg.cost && phase === 'idle' ? '#00d97e' : '#1e2d45',
+                color: phase === 'success' ? '#080c16' : phase === 'fail' ? '#ef4444' : cfg && points >= (cfg?.cost || 0) && phase === 'idle' && !maxed ? '#080c16' : '#5a7490',
+                cursor: !cfg || maxed || phase !== 'idle' || points < (cfg?.cost || 0) ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {isTrying
+                ? `강화 진행 중... ${Math.round(tryProgress * 100)}%`
+                : phase === 'success'
+                  ? `+${player.enhance} 강화 성공!`
+                  : phase === 'fail'
+                    ? '강화 실패...'
+                    : maxed
+                      ? 'MAX 강화'
+                      : !cfg
+                        ? '강화 불가'
+                        : points < cfg.cost
+                          ? '포인트 부족'
+                          : `강화 시도 (${cfg.cost.toLocaleString()}P)`}
             </button>
           </div>
         </div>
       )}
       {!player && (
-        <div className="rounded-2xl border border-border p-12 text-center text-muted" style={{ background:'#0d1526' }}>
+        <div className="rounded-2xl border border-border p-12 text-center text-muted" style={{ background: '#0d1526' }}>
           강화할 선수를 선택하세요
         </div>
       )}
