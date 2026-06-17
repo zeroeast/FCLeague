@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Emblem } from '../components/Emblem.jsx';
-import { PlayerSlot } from '../components/PlayerSlot.jsx';
+import { PitchFormation } from '../components/PitchFormation.jsx';
 import { pickAbilitiesByName } from '../constants/managerTraits.js';
+import { getFormationPositions } from '../constants/formationLayouts.js';
 
 const MANAGERS = [
   { name:'영동', formation:'4-3-3',   ovr:91, pts:28,
@@ -22,10 +23,9 @@ const MANAGERS = [
     best11:['김민재','이강인','황희찬','가비','페드리','파블로','아라우호','크리스텐센','발데','에릭가르시아','테어슈테겐'] },
 ];
 
-const POS = ['ST','RW','LW','CAM','CM','CM','RB','CB','CB','LB','GK'];
-
-/** Sample OVR per slot until API provides real values */
+/** Sample OVR / enhance per slot until API provides real values */
 const SLOT_OVR = [97, 93, 92, 91, 91, 91, 88, 90, 89, 87, 90];
+const SLOT_ENH = [8, 7, 7, 6, 5, 5, 5, 6, 5, 4, 5];
 
 function AbilityCard({ ability }) {
   const costLabel = ability.cost ? `${ability.cost}P` : '지속형';
@@ -145,53 +145,63 @@ export default function Teams() {
       </div>
 
       {selected && (
-        <div className="rounded-2xl border border-accent/30 p-6 space-y-5"
+        <div className="rounded-2xl border border-accent/30 overflow-hidden"
           style={{ background:'linear-gradient(135deg, #0d1526, #0d1f20)', boxShadow:'0 0 32px rgba(0,217,126,0.1)' }}>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
+
+          {/* header */}
+          <div className="px-6 py-4 border-b border-border/60 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Emblem name={selected.name} size={60} />
+              <Emblem name={selected.name} size={56} />
               <div>
                 <p className="text-xl font-black">{selected.name} 감독</p>
-                <p className="text-sm text-muted">{selected.formation} · OVR {selected.ovr}</p>
+                <p className="text-sm text-muted">
+                  {selected.formation} · 팀 OVR <span className="text-accent font-bold">{selected.ovr}</span>
+                  · 승점 <span className="font-bold">{selected.pts}pt</span>
+                </p>
               </div>
             </div>
-            <div className="min-w-[320px]">
-              <div
-                className="p-4 border space-y-3"
-                style={{
-                  background: 'linear-gradient(160deg, rgba(0,217,126,0.06) 0%, rgba(13,21,38,0.95) 45%)',
-                  borderColor: 'rgba(0,217,126,0.25)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] text-accent uppercase tracking-[0.2em] font-bold">Manager Trait</p>
-                    <p className="text-sm font-black text-text">감독 특성</p>
-                  </div>
-                  <button onClick={() => setSelected(null)} className="text-muted hover:text-text text-2xl w-8 h-8 flex items-center justify-center">×</button>
-                </div>
-                <div className="grid grid-cols-1 gap-2.5">
-                  {(managerAbilities[selected.name] ?? []).map((ability) => (
-                    <AbilityCard key={`${selected.name}-${ability.id}`} ability={ability} />
-                  ))}
-                </div>
-                <p className="text-[10px] text-muted text-center pt-1">카드에 마우스를 올리면 상세 설명이 표시됩니다</p>
-              </div>
-            </div>
+            <button
+              onClick={() => setSelected(null)}
+              className="text-muted hover:text-text text-2xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-bg-elevated/50 shrink-0"
+            >
+              ×
+            </button>
           </div>
 
-          <div>
-            <p className="text-xs text-muted uppercase tracking-widest mb-3 font-bold">Best 11</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {selected.best11.map((player, i) => (
-                <PlayerSlot
-                  key={i}
-                  name={player}
-                  pos={POS[i]}
-                  ovr={SLOT_OVR[i]}
-                />
-              ))}
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+            {/* pitch */}
+            <div className="space-y-3">
+              <p className="text-xs text-muted uppercase tracking-widest font-bold text-center lg:text-left">
+                Best 11 · 포메이션
+              </p>
+              <PitchFormation
+                formation={selected.formation}
+                players={selected.best11}
+                positions={getFormationPositions(selected.formation)}
+                ovrList={SLOT_OVR}
+                enhanceList={SLOT_ENH}
+              />
+            </div>
+
+            {/* traits */}
+            <div
+              className="p-4 border space-y-3 rounded-xl"
+              style={{
+                background: 'linear-gradient(160deg, rgba(0,217,126,0.06) 0%, rgba(13,21,38,0.95) 45%)',
+                borderColor: 'rgba(0,217,126,0.25)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+              }}
+            >
+              <div>
+                <p className="text-[10px] text-accent uppercase tracking-[0.2em] font-bold">Manager Trait</p>
+                <p className="text-sm font-black text-text">감독 특성</p>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 max-h-[480px] overflow-y-auto pr-1">
+                {(managerAbilities[selected.name] ?? []).map((ability) => (
+                  <AbilityCard key={`${selected.name}-${ability.id}`} ability={ability} />
+                ))}
+              </div>
+              <p className="text-[10px] text-muted text-center">카드에 마우스를 올리면 상세 설명이 표시됩니다</p>
             </div>
           </div>
         </div>
