@@ -1,0 +1,25 @@
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout.jsx';
+import Home from './pages/Home.jsx';
+import League from './pages/League.jsx';
+import Teams from './pages/Teams.jsx';
+import Players from './pages/Players.jsx';
+import Stats from './pages/Stats.jsx';
+import HallOfFame from './pages/HallOfFame.jsx';
+import Login from './pages/Login.jsx';
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="league" element={<League />} />
+        <Route path="teams" element={<Teams />} />
+        <Route path="players" element={<Players />} />
+        <Route path="stats" element={<Stats />} />
+        <Route path="hall-of-fame" element={<HallOfFame />} />
+      </Route>
+    </Routes>
+  );
+}
