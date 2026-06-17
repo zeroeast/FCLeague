@@ -2,7 +2,9 @@ import { useState, useRef } from 'react';
 import { PlayerCard } from '../components/PlayerCard.jsx';
 import { PlayerSlot } from '../components/PlayerSlot.jsx';
 import { Emblem } from '../components/Emblem.jsx';
+import { PlayerName } from '../components/PlayerName.jsx';
 import { getEnhanceColor, getOvrSlotStyle, getPositionColor } from '../constants/playerColors.js';
+import { getCardSeason } from '../constants/seasonTags.js';
 import {
   MANAGER_NAMES,
   SAMPLE_CURRENT_MANAGER,
@@ -207,7 +209,7 @@ function DrawSection({ points, setPoints }) {
       {showToast && result && (
         <div className="fixed top-20 z-50 px-6 py-3 rounded-xl font-black text-sm"
           style={{ left:'50%', background:RARITY[result.rarity].color, color:'#080c16', boxShadow:`0 0 32px ${RARITY[result.rarity].glow}`, animation:'toast-drop .3s ease-out forwards' }}>
-          {result.name} 획득!
+          {getCardSeason(result.name).code} {result.name} 획득!
         </div>
       )}
       <div className="flex items-center gap-4 rounded-2xl p-4" style={{ background:'#0d1526', border:'1px solid #1e2d45' }}>
@@ -250,7 +252,7 @@ function DrawSection({ points, setPoints }) {
           </div>
         )}
         <p className="mt-6 text-sm" style={{ color:'#5a7490' }}>
-          {phase==='idle'?'뽑기 1회 100P':phase==='spinning'?'뽑는 중...':result?`${result.name} 획득!`:''}
+          {phase==='idle'?'뽑기 1회 100P':phase==='spinning'?'뽑는 중...':result?`${getCardSeason(result.name).code} ${result.name} 획득!`:''}
         </p>
       </div>
       <div className="flex gap-3">
@@ -608,9 +610,9 @@ function ShuffleSection({ points, setPoints }) {
                     const slot = getOvrSlotStyle(p.ovr);
                     const posColor = getPositionColor(p.pos);
                     return (
-                      <span key={i} className="text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1"
+                      <span key={i} className="text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1 flex-wrap"
                         style={{ background:slot.background, color:slot.nameColor, border:`1px solid ${slot.border}` }}>
-                        {p.name}
+                        <PlayerName name={p.name} nameClassName="text-xs" />
                         <span className="font-black" style={{ color:slot.accent }}>{p.ovr}</span>
                         <span className="w-0.5 h-3 rounded-full inline-block" style={{ background:posColor }} />
                       </span>

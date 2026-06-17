@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Emblem } from '../components/Emblem.jsx';
 import { getPositionColor } from '../constants/playerColors.js';
+import { getCardSeason } from '../constants/seasonTags.js';
+import { PlayerName } from '../components/PlayerName.jsx';
+import { SeasonIcon } from '../components/SeasonIcon.jsx';
 
 const TEAM_STATS = [
   { name:'영동', played:10, w:9, d:1, l:0, gf:34, ga:8,  pts:28, recent:['W','W','W','D','W'] },
@@ -235,7 +238,7 @@ function PlayerTab() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[10px] text-muted uppercase tracking-wider border-b border-border/60">
-                  {['순위','선수','시즌','포지션','출전','골','도움','파워'].map((h) => (
+                  {['순위','선수','카드','포지션','출전','골','도움','파워'].map((h) => (
                     <th key={h} className="px-3 py-3 font-bold text-left whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -247,10 +250,12 @@ function PlayerTab() {
                     <tr key={`${p.player}-${p.manager}`} className="hover:bg-bg-elevated/30 transition-colors">
                       <td className="px-3 py-2.5"><RankBadge rank={rank} sm /></td>
                       <td className="px-3 py-2.5">
-                        <span className="font-bold">{p.player}</span>
+                        <PlayerName name={p.player} />
                         <span className="text-[10px] text-muted ml-1.5">({p.manager})</span>
                       </td>
-                      <td className="px-3 py-2.5 text-muted">{p.season}</td>
+                      <td className="px-3 py-2.5">
+                        <SeasonIcon playerName={p.player} size="md" />
+                      </td>
                       <td className="px-3 py-2.5">
                         <span className="text-xs font-bold px-1.5 py-0.5 rounded"
                           style={{ color: getPositionColor(p.pos), background:`${getPositionColor(p.pos)}18` }}>
@@ -276,8 +281,11 @@ function PlayerTab() {
               <div key={w.player} className="rounded-xl border border-border/50 p-3 bg-bg-elevated/30 hover:bg-bg-elevated/50 transition-colors">
                 <div className="flex items-center gap-2 mb-1.5">
                   <RankBadge rank={i + 1} sm />
-                  <span className="font-bold text-sm">{w.player}</span>
-                  <span className="text-[10px] text-muted">{w.season} · {w.manager}</span>
+                  <span className="font-bold text-sm"><PlayerName name={w.player} /></span>
+                  <span className="text-[10px] text-muted inline-flex items-center gap-1">
+                    <SeasonIcon playerName={w.player} size="xs" />
+                    {w.manager}
+                  </span>
                 </div>
                 <p className="text-xs text-muted">
                   출전 {w.apps} · 골 {w.goals} · 도움 {w.assists}
@@ -296,8 +304,11 @@ function PlayerTab() {
               <div key={p.player} className="px-4 py-3 flex items-center gap-2.5 hover:bg-bg-elevated/30">
                 <RankBadge rank={i + 1} sm />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate">{p.player}</p>
-                  <p className="text-[10px] text-muted">{p.season} · {p.pos} · 경기당 {(p.goals / p.apps).toFixed(1)}골</p>
+                  <p className="text-sm truncate"><PlayerName name={p.player} /></p>
+                  <p className="text-[10px] text-muted inline-flex items-center gap-1 flex-wrap">
+                    <SeasonIcon playerName={p.player} size="xs" />
+                    <span>{p.pos} · 경기당 {(p.goals / p.apps).toFixed(1)}골</span>
+                  </p>
                 </div>
                 <span className="text-lg font-black text-accent">{p.goals}</span>
               </div>
@@ -311,8 +322,11 @@ function PlayerTab() {
               <div key={p.player} className="px-4 py-3 flex items-center gap-2.5 hover:bg-bg-elevated/30">
                 <RankBadge rank={i + 1} sm />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate">{p.player}</p>
-                  <p className="text-[10px] text-muted">{p.season} · {p.pos} · 경기당 {(p.assists / p.apps).toFixed(1)}도움</p>
+                  <p className="text-sm truncate"><PlayerName name={p.player} /></p>
+                  <p className="text-[10px] text-muted inline-flex items-center gap-1 flex-wrap">
+                    <SeasonIcon playerName={p.player} size="xs" />
+                    <span>{p.pos} · 경기당 {(p.assists / p.apps).toFixed(1)}도움</span>
+                  </p>
                 </div>
                 <span className="text-lg font-black" style={{ color:'#7c3aed' }}>{p.assists}</span>
               </div>
@@ -326,8 +340,11 @@ function PlayerTab() {
               <div key={p.player} className="px-4 py-3 flex items-center gap-2.5 hover:bg-bg-elevated/30">
                 <RankBadge rank={i + 1} sm />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate">{p.player}</p>
-                  <p className="text-[10px] text-muted">{p.season} · {p.pos}</p>
+                  <p className="text-sm truncate"><PlayerName name={p.player} /></p>
+                  <p className="text-[10px] text-muted inline-flex items-center gap-1">
+                    <SeasonIcon playerName={p.player} size="xs" />
+                    <span>{p.pos}</span>
+                  </p>
                 </div>
                 <span className="text-lg font-black" style={{ color:'#38bdf8' }}>{p.defense}</span>
               </div>

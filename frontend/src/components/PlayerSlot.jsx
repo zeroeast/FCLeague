@@ -4,6 +4,7 @@ import {
   getPositionColor,
 } from '../constants/playerColors.js';
 import { OvrBadge } from './OvrBadge.jsx';
+import { PlayerName } from './PlayerName.jsx';
 
 /** Compact player row / grid slot */
 export function PlayerSlot({
@@ -11,6 +12,7 @@ export function PlayerSlot({
   pos,
   ovr = 85,
   enhance = null,
+  cardSeason = null,
   selected = false,
   onClick,
   as = 'div',
@@ -42,8 +44,8 @@ export function PlayerSlot({
           </span>
         )}
       </div>
-      <p className="font-bold text-sm truncate mb-2" style={{ color: slot.nameColor }}>
-        {name}
+      <p className="text-sm truncate mb-2" style={{ color: slot.nameColor }}>
+        <PlayerName name={name} cardSeason={cardSeason} stacked nameStyle={{ color: slot.nameColor }} />
       </p>
       <OvrBadge ovr={ovr} pos={pos} size="sm" />
     </Tag>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Emblem } from '../components/Emblem.jsx';
+import { PlayerName } from '../components/PlayerName.jsx';
 
 const STANDINGS = [
   { rank:1, name:'영동',  w:9, d:1, l:0, gf:34, ga:8,  pts:28 },
@@ -172,7 +173,7 @@ export default function Home() {
                     style={{ color: RANK_COLOR(s.rank) || '#5a7490' }}>{s.rank}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-1">
-                      <span className="font-bold text-sm text-text">{s.player}</span>
+                      <span className="font-bold text-sm text-text"><PlayerName name={s.player} /></span>
                       <span className="text-xs text-muted">({s.manager})</span>
                     </div>
                     <div className="mt-1 h-1 rounded-full bg-bg-elevated overflow-hidden">

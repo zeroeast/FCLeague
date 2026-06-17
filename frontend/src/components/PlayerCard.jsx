@@ -5,6 +5,7 @@ import {
   getPositionColor,
 } from '../constants/playerColors.js';
 import { OvrBadge } from './OvrBadge.jsx';
+import { PlayerName } from './PlayerName.jsx';
 
 export function PlayerCard({
   player,
@@ -62,11 +63,14 @@ export function PlayerCard({
         {player.pos}
       </span>
 
-      <span
-        className={`${large ? 'text-xl' : 'text-lg'} font-black text-center px-2 leading-tight`}
-        style={{ color: slot.nameColor }}
-      >
-        {player.name}
+      <span className={`${large ? 'text-xl' : 'text-lg'} text-center px-2 leading-tight`}>
+        <PlayerName
+          name={player.name}
+          cardSeason={player.cardSeason}
+          stacked
+          nameClassName={large ? 'text-xl' : 'text-lg'}
+          nameStyle={{ color: slot.nameColor }}
+        />
       </span>
 
       <OvrBadge ovr={player.ovr} pos={player.pos} size={large ? 'lg' : 'md'} />

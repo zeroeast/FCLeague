@@ -4,6 +4,7 @@ import {
   getOvrSlotStyle,
   getPositionColor,
 } from '../constants/playerColors.js';
+import { PlayerName } from './PlayerName.jsx';
 
 function PitchPlayer({ name, pos, ovr, enhance }) {
   const slot = getOvrSlotStyle(ovr);
@@ -25,9 +26,9 @@ function PitchPlayer({ name, pos, ovr, enhance }) {
         <p className="text-[9px] font-black uppercase leading-none" style={{ color: posColor }}>
           {pos}
         </p>
-        <p className="text-[11px] font-black truncate leading-tight mt-0.5" style={{ color: slot.nameColor }}>
-          {name}
-        </p>
+        <div className="mt-0.5 px-0.5">
+          <PlayerName name={name} stacked nameStyle={{ color: slot.nameColor }} nameClassName="text-[11px]" />
+        </div>
         <div className="flex items-center justify-center gap-1 mt-1">
           <span className="text-[10px] font-black text-white">{ovr}</span>
           {enhance != null && (
