@@ -103,3 +103,43 @@ export function getOvrSlotStyle(ovr) {
     glow: `0 0 20px ${tier.accent}22`,
   };
 }
+
+/**
+ * Player slot/card visual — dark muted base so enhance tier + OVR read clearly.
+ */
+export function getPlayerSlotVisual(ovr, enhance = null) {
+  const ovrTier = getOvrTier(ovr);
+  const enhTier = getEnhanceTier(enhance);
+  const enhColor = enhance != null ? getEnhanceColor(enhance) : null;
+
+  const background = 'linear-gradient(160deg, #070a12 0%, #0c101a 45%, #080c14 100%)';
+  let border = `1px solid rgba(${ovr >= 94 ? '251,191,36' : ovr >= 91 ? '168,85,247' : '60,80,110'},0.35)`;
+  let boxShadow = `inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -8px 16px ${ovrTier.accent}12`;
+
+  if (enhTier === 'platinum') {
+    border = `2px solid ${enhColor}`;
+    boxShadow = `${getEnhanceGlow(enhance)}, inset 0 0 28px rgba(232,246,255,0.12), 0 0 0 1px rgba(255,255,255,0.08)`;
+  } else if (enhTier === 'gold') {
+    border = `2px solid ${enhColor}`;
+    boxShadow = `${getEnhanceGlow(enhance)}, inset 0 0 20px rgba(255,215,0,0.08)`;
+  } else if (enhTier === 'silver') {
+    border = `2px solid ${enhColor}`;
+    boxShadow = `${getEnhanceGlow(enhance)}, inset 0 0 16px rgba(192,192,192,0.06)`;
+  } else if (ovr >= 94) {
+    border = `1px solid ${ovrTier.accent}aa`;
+    boxShadow = `0 0 20px ${ovrTier.accent}44, inset 0 0 12px ${ovrTier.accent}18`;
+  } else if (ovr >= 91) {
+    border = `1px solid ${ovrTier.accent}77`;
+    boxShadow = `0 0 14px ${ovrTier.accent}33`;
+  }
+
+  return {
+    background,
+    border,
+    boxShadow,
+    nameColor: ovrTier.name,
+    accent: ovrTier.accent,
+    enhColor,
+    ovrTier,
+  };
+}

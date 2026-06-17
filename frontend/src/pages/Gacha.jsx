@@ -107,7 +107,7 @@ function TabBtn({ id, label, active, onClick }) {
   );
 }
 
-export function GachaPanel({ className = '' }) {
+export function GachaPanel({ className = '', fullWidth = false }) {
   const [tab, setTab] = useState('draw');
   const [managerPoints, setManagerPoints] = useState(() => ({ ...getManagerPointsMap() }));
   const currentUser = SAMPLE_CURRENT_MANAGER;
@@ -121,55 +121,37 @@ export function GachaPanel({ className = '' }) {
   };
 
   return (
-    <>
-      <style>{`
-        @keyframes card-reveal  { 0%{transform:rotateY(90deg) scale(.8);opacity:0} 60%{transform:rotateY(-8deg) scale(1.05)} 100%{transform:rotateY(0) scale(1);opacity:1} }
-        @keyframes shine-sweep  { 0%{left:-100%} 100%{left:200%} }
-        @keyframes toast-drop   { 0%{transform:translateX(-50%) translateY(-16px);opacity:0} 100%{transform:translateX(-50%) translateY(0);opacity:1} }
-        @keyframes card-float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes spin-flicker { 0%,100%{opacity:1} 50%{opacity:.3} }
-        @keyframes card-shake   { 0%,100%{transform:translate(0,0) rotate(0)} 20%{transform:translate(-5px,1px) rotate(-2deg)} 40%{transform:translate(5px,-1px) rotate(2deg)} 60%{transform:translate(-4px,0) rotate(-1deg)} 80%{transform:translate(4px,0) rotate(1deg)} }
-        @keyframes shuffle-spin { 0%{transform:rotate(0) scale(1)} 50%{transform:rotate(180deg) scale(1.15)} 100%{transform:rotate(360deg) scale(1)} }
-        @keyframes fade-in      { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        .anim-reveal  { animation:card-reveal  .6s cubic-bezier(.34,1.56,.64,1) forwards }
-        .anim-float   { animation:card-float   3s ease-in-out infinite }
-        .anim-flicker { animation:spin-flicker .14s ease-in-out infinite }
-        .anim-shake   { animation:card-shake   .35s ease-in-out infinite }
-        .anim-shuffle { animation:shuffle-spin .7s ease-in-out infinite }
-        .anim-fadein  { animation:fade-in      .4s ease-out forwards }
-      `}</style>
-
-      <div className={`space-y-4 ${className}`}>
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent">Point Content</p>
-            <h2 className="text-lg font-black text-text">포인트 콘텐츠</h2>
-            <p className="text-xs text-muted mt-0.5">{currentUser} 감독</p>
-          </div>
-          <div className="text-right shrink-0">
-            <p className="text-[10px] uppercase tracking-widest text-muted">보유 포인트</p>
-            <p className="text-xl font-black text-accent">{formatPoints(points)}</p>
-          </div>
+    <div className={`space-y-5 ${fullWidth ? 'max-w-4xl mx-auto' : ''} ${className}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent">Point Content</p>
+          <h2 className={`font-black text-text ${fullWidth ? 'text-2xl' : 'text-lg'}`}>포인트 콘텐츠</h2>
+          <p className="text-xs text-muted mt-0.5">{currentUser} 감독 · 뽑기 · 강화 · 셔플</p>
         </div>
-
-        <div className="flex gap-0 border-b border-border overflow-x-auto">
-          <TabBtn id="draw"    label="선수 뽑기" active={tab} onClick={setTab} />
-          <TabBtn id="enhance" label="강화 시도" active={tab} onClick={setTab} />
-          <TabBtn id="shuffle" label="선수 셔플" active={tab} onClick={setTab} />
+        <div className="text-right shrink-0">
+          <p className="text-[10px] uppercase tracking-widest text-muted">보유 포인트</p>
+          <p className={`font-black text-accent ${fullWidth ? 'text-3xl' : 'text-xl'}`}>{formatPoints(points)}</p>
         </div>
-
-        {tab === 'draw'    && <DrawSection    points={points} setPoints={setMyPoints} />}
-        {tab === 'enhance' && (
-          <EnhanceSection
-            points={points}
-            currentUser={currentUser}
-            managerPoints={managerPoints}
-            setManagerPoints={setManagerPoints}
-          />
-        )}
-        {tab === 'shuffle' && <ShuffleSection points={points} setPoints={setMyPoints} />}
       </div>
-    </>
+
+      <div className="flex gap-0 border-b border-border overflow-x-auto">
+        <TabBtn id="draw"    label="선수 뽑기" active={tab} onClick={setTab} />
+        <TabBtn id="enhance" label="강화 시도" active={tab} onClick={setTab} />
+        <TabBtn id="shuffle" label="선수 셔플" active={tab} onClick={setTab} />
+      </div>
+
+      {tab === 'draw'    && <DrawSection    points={points} setPoints={setMyPoints} fullWidth={fullWidth} />}
+      {tab === 'enhance' && (
+        <EnhanceSection
+          points={points}
+          currentUser={currentUser}
+          managerPoints={managerPoints}
+          setManagerPoints={setManagerPoints}
+          fullWidth={fullWidth}
+        />
+      )}
+      {tab === 'shuffle' && <ShuffleSection points={points} setPoints={setMyPoints} fullWidth={fullWidth} />}
+    </div>
   );
 }
 
@@ -183,7 +165,7 @@ export default function Gacha() {
 }
 
 // ── 탭1: 선수 뽑기 ────────────────────────────────────────────────────────────
-function DrawSection({ points, setPoints }) {
+function DrawSection({ points, setPoints, fullWidth }) {
   const [phase, setPhase]         = useState('idle');
   const [displayP, setDisplayP]   = useState(DRAW_PLAYERS[0]);
   const [result, setResult]       = useState(null);
@@ -214,12 +196,22 @@ function DrawSection({ points, setPoints }) {
   const reset = () => { clearTimeout(timer.current); setPhase('idle'); setResult(null); };
   const r = result ? RARITY[result.rarity] : null;
 
+  const stageClass = phase === 'spinning' ? 'gacha-stage gacha-stage--spinning' : phase === 'result' ? 'gacha-stage gacha-stage--result' : 'gacha-stage';
+
   return (
     <div className="space-y-5">
       {showToast && result && (
-        <div className="fixed top-20 z-50 px-6 py-3 rounded-xl font-black text-sm"
-          style={{ left:'50%', background:RARITY[result.rarity].color, color:'#080c16', boxShadow:`0 0 32px ${RARITY[result.rarity].glow}`, animation:'toast-drop .3s ease-out forwards' }}>
-          {getCardSeason(result.name).code} {result.name} 획득!
+        <div
+          className="fixed top-20 z-50 px-8 py-4 rounded-2xl font-black text-base gacha-toast-jackpot"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: RARITY[result.rarity].color,
+            color: '#080c16',
+            boxShadow: `0 0 48px ${RARITY[result.rarity].glow}, 0 0 96px ${RARITY[result.rarity].glow}`,
+          }}
+        >
+          ★ {getCardSeason(result.name).code} {result.name} 획득! ★
         </div>
       )}
       <div className="flex items-center gap-4 rounded-2xl p-4" style={{ background:'#0d1526', border:'1px solid #1e2d45' }}>
@@ -235,28 +227,47 @@ function DrawSection({ points, setPoints }) {
         </div>
         <span className="ml-auto text-xs" style={{ color:'#5a7490' }}>{pool.length}명</span>
       </div>
-      <div className="relative rounded-3xl flex flex-col items-center justify-center py-14"
-        style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', border:'1px solid #1e2d45', minHeight:340 }}>
+      <div
+        className={`relative rounded-3xl flex flex-col items-center justify-center py-14 overflow-hidden ${stageClass}`}
+        style={{
+          background: 'linear-gradient(135deg,#0a0e18,#0d1526,#111e38)',
+          border: phase === 'result' && r ? `2px solid ${r.color}` : '1px solid #1e2d45',
+          minHeight: fullWidth ? 400 : 340,
+          boxShadow: phase === 'result' && r ? `0 0 60px ${r.glow}, 0 0 120px ${r.glow}` : 'none',
+        }}
+      >
+        {phase === 'spinning' && (
+          <div
+            className="absolute inset-0 pointer-events-none gacha-radial-bg opacity-30"
+            style={{
+              background: 'conic-gradient(from 0deg, transparent, rgba(0,217,126,0.4), transparent, rgba(168,85,247,0.4), transparent)',
+            }}
+          />
+        )}
+        {phase === 'result' && (
+          <div className="absolute inset-0 pointer-events-none gacha-screen-flash" style={{ background: 'rgba(255,255,255,0.15)' }} />
+        )}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background:phase==='result'&&r?`radial-gradient(ellipse at 50% 60%,${r.glow} 0%,transparent 60%)`:'radial-gradient(ellipse at 50% 60%,rgba(0,217,126,.07) 0%,transparent 60%)' }} />
+          style={{ background:phase==='result'&&r?`radial-gradient(ellipse at 50% 60%,${r.glow} 0%,transparent 65%)`:'radial-gradient(ellipse at 50% 60%,rgba(0,217,126,.1) 0%,transparent 60%)' }} />
         {phase==='idle' && (
           <div className="anim-float">
             <div className="w-40 h-56 rounded-2xl flex flex-col items-center justify-center gap-3"
-              style={{ background:'linear-gradient(135deg,#0a1628,#0d1f3c)', border:'2px solid #00d97e', boxShadow:'0 0 32px rgba(0,217,126,.3)' }}>
-              <div className="text-5xl font-black" style={{ color:'#00d97e' }}>FC</div>
+              style={{ background:'linear-gradient(135deg,#0a1628,#0d1f3c)', border:'2px solid #00d97e', boxShadow:'0 0 48px rgba(0,217,126,.45), 0 0 80px rgba(0,217,126,.2)' }}>
+              <div className="text-5xl font-black" style={{ color:'#00d97e', textShadow:'0 0 24px rgba(0,217,126,.8)' }}>FC</div>
               <div className="text-xs tracking-widest uppercase" style={{ color:'#5a7490' }}>뽑기권</div>
             </div>
           </div>
         )}
         {phase==='spinning' && (
-          <div className="anim-flicker">
+          <div className="gacha-vortex relative">
             <PlayerCard player={displayP} rarity={RARITY[displayP.rarity]} />
           </div>
         )}
         {phase==='result' && result && (
-          <div className="anim-reveal relative overflow-hidden rounded-2xl">
+          <div className="anim-reveal-dopamine gacha-jackpot-pop relative overflow-hidden rounded-2xl">
             <div className="absolute inset-0 pointer-events-none z-10 rounded-2xl overflow-hidden">
-              <div style={{ position:'absolute',top:0,width:'55%',height:'100%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)',animation:'shine-sweep .9s ease-out .2s both' }} />
+              <div className="absolute inset-0 gacha-flash-burst" />
+              <div style={{ position:'absolute',top:0,width:'55%',height:'100%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)',animation:'shine-sweep .9s ease-out .2s both' }} />
             </div>
             <PlayerCard player={result} rarity={r} large />
           </div>
@@ -370,7 +381,7 @@ function SoulSupportPanel({ currentUser, managerPoints, soulSupport, setSoulSupp
   );
 }
 
-function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints }) {
+function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, fullWidth }) {
   const [squad, setSquad]       = useState(INIT_SQUAD.map(p => ({...p})));
   const [selId, setSelId]       = useState(null);
   const [phase, setPhase]       = useState('idle');
@@ -430,8 +441,8 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints }
       </div>
 
       {player && (
-        <div className="rounded-2xl border overflow-hidden anim-fadein"
-          style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', borderColor:`${enhBorder}44` }}>
+        <div className={`rounded-2xl border overflow-hidden anim-fadein gacha-stage ${phase === 'trying' ? 'gacha-stage--spinning' : phase === 'success' ? 'gacha-stage--result' : ''}`}
+          style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', borderColor:`${enhBorder}66`, boxShadow: phase==='success' ? `0 0 60px ${enhBorder}88` : 'none' }}>
           <div className="p-6 flex flex-col items-center gap-5">
             <PlayerCard
               player={player}
@@ -517,7 +528,7 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints }
 }
 
 // ── 탭3: 선수 셔플 ────────────────────────────────────────────────────────────
-function ShuffleSection({ points, setPoints }) {
+function ShuffleSection({ points, setPoints, fullWidth }) {
   const [selSeasons, setSel] = useState(['24-25']);
   const [ovrMin, setMin]     = useState(80);
   const [ovrMax, setMax]     = useState(99);
@@ -579,13 +590,16 @@ function ShuffleSection({ points, setPoints }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border p-8 flex flex-col items-center gap-5"
-        style={{ background:'linear-gradient(135deg,#0d1526,#111e38)' }}>
+      <div className={`relative rounded-2xl border border-border p-8 flex flex-col items-center gap-5 gacha-stage ${phase==='shuffling' ? 'gacha-stage--spinning' : phase==='done' ? 'gacha-stage--result' : ''}`}
+        style={{ background:'linear-gradient(135deg,#0d1526,#111e38)', minHeight: fullWidth ? 200 : 160 }}>
         {phase==='shuffling' && (
-          <div className="anim-shuffle w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black"
-            style={{ background:'rgba(0,217,126,.1)', border:'2px solid #00d97e', color:'#00d97e' }}>
-            S
-          </div>
+          <>
+            <div className="absolute inset-0 pointer-events-none gacha-screen-flash opacity-20" style={{ background: 'rgba(0,217,126,0.3)' }} />
+            <div className="gacha-shuffle-burst w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-black"
+              style={{ background:'rgba(0,217,126,.15)', border:'3px solid #00d97e', color:'#00d97e', boxShadow:'0 0 48px rgba(0,217,126,.6)' }}>
+              ⚡
+            </div>
+          </>
         )}
         {phase!=='shuffling' && (
           <p className="text-sm text-muted text-center">

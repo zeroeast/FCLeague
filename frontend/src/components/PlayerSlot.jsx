@@ -1,8 +1,10 @@
 import {
   getEnhanceLabelStyle,
-  getOvrSlotStyle,
+  getPlayerSlotVisual,
   getPositionColor,
 } from '../constants/playerColors.js';
+import { getActivityMeta } from '../constants/playerActivity.js';
+import { ActivityBadge } from './ActivityBadge.jsx';
 import { OvrBadge } from './OvrBadge.jsx';
 import { PlayerName } from './PlayerName.jsx';
 
@@ -17,37 +19,68 @@ export function PlayerSlot({
   onClick,
   as = 'div',
 }) {
-  const slot = getOvrSlotStyle(ovr);
+  const visual = getPlayerSlotVisual(ovr, enhance);
   const posColor = getPositionColor(pos);
+  const activity = getActivityMeta(name);
   const Tag = onClick ? 'button' : as;
 
   return (
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className="rounded-xl p-3 text-left transition-all w-full"
+      className="relative rounded-xl p-3 text-left transition-all w-full overflow-hidden"
       style={{
-        background: selected
-          ? `linear-gradient(145deg, ${slot.bgFrom}, ${slot.bgTo})`
-          : slot.background,
-        border: `1px solid ${selected ? posColor : slot.border}`,
-        boxShadow: selected ? `0 0 16px ${posColor}33` : 'none',
+        background: visual.background,
+        border: selected ? `2px solid ${posColor}` : visual.border,
+        boxShadow: selected
+          ? `0 0 20px ${posColor}55, ${visual.boxShadow}`
+          : visual.boxShadow,
       }}
     >
-      <div className="flex items-start justify-between gap-2 mb-1.5">
+      {enhance != null && enhance >= 5 && (
+        <div
+          className="absolute inset-0 pointer-events-none rounded-xl opacity-40"
+          style={{
+            background: `radial-gradient(ellipse at 50% 0%, ${visual.enhColor}33 0%, transparent 65%)`,
+          }}
+        />
+      )}
+
+      <ActivityBadge playerName={name} />
+
+      <div className="relative flex items-start justify-between gap-2 mb-1.5">
         <span className="text-xs font-bold uppercase" style={{ color: posColor }}>
           {pos}
         </span>
         {enhance != null && (
-          <span className="text-xs font-black" style={getEnhanceLabelStyle(enhance)}>
+          <span
+            className="text-xs font-black px-1.5 py-0.5 rounded"
+            style={{
+              ...getEnhanceLabelStyle(enhance),
+              background: 'rgba(0,0,0,0.35)',
+            }}
+          >
             +{enhance}
           </span>
         )}
       </div>
-      <p className="text-sm truncate mb-2" style={{ color: slot.nameColor }}>
-        <PlayerName name={name} cardSeason={cardSeason} stacked nameStyle={{ color: slot.nameColor }} />
+
+      <p className="relative text-sm truncate mb-2 font-bold" style={{ color: visual.nameColor }}>
+        <PlayerName name={name} cardSeason={cardSeason} stacked nameStyle={{ color: visual.nameColor }} />
       </p>
-      <OvrBadge ovr={ovr} pos={pos} size="sm" />
+
+      <div className="relative flex items-end justify-between gap-2">
+        <OvrBadge ovr={ovr} pos={pos} size="sm" />
+        {activity.grade && (
+          <span
+            className="text-[9px] font-bold tabular-nums"
+            style={{ color: activity.color }}
+            title={`활약도 ${activity.score}`}
+          >
+            {activity.sellLabel}
+          </span>
+        )}
+      </div>
     </Tag>
   );
 }

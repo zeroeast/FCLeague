@@ -1,38 +1,44 @@
 import { getFormationCoords } from '../constants/formationLayouts.js';
 import {
   getEnhanceLabelStyle,
-  getOvrSlotStyle,
+  getPlayerSlotVisual,
   getPositionColor,
 } from '../constants/playerColors.js';
+import { ActivityBadge } from './ActivityBadge.jsx';
 import { PlayerName } from './PlayerName.jsx';
 
 function PitchPlayer({ name, pos, ovr, enhance }) {
-  const slot = getOvrSlotStyle(ovr);
+  const visual = getPlayerSlotVisual(ovr, enhance);
   const posColor = getPositionColor(pos);
 
   return (
     <div
-      className="flex flex-col items-center gap-0.5 w-[72px] sm:w-[80px] pointer-events-none select-none"
-      style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.45))' }}
+      className="relative flex flex-col items-center gap-0.5 w-[72px] sm:w-[80px] pointer-events-none select-none"
+      style={{ filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.55))' }}
     >
       <div
-        className="w-full rounded-lg px-1.5 py-1.5 text-center border"
+        className="relative w-full rounded-lg px-1.5 py-1.5 text-center overflow-hidden"
         style={{
-          background: `linear-gradient(160deg, ${slot.bgFrom}ee, ${slot.bgTo}ee)`,
-          borderColor: `${posColor}88`,
+          background: visual.background,
+          border: visual.border,
+          boxShadow: visual.boxShadow,
           backdropFilter: 'blur(4px)',
         }}
       >
+        <ActivityBadge playerName={name} />
         <p className="text-[9px] font-black uppercase leading-none" style={{ color: posColor }}>
           {pos}
         </p>
         <div className="mt-0.5 px-0.5">
-          <PlayerName name={name} stacked nameStyle={{ color: slot.nameColor }} nameClassName="text-[11px]" />
+          <PlayerName name={name} stacked nameStyle={{ color: visual.nameColor }} nameClassName="text-[11px] font-bold" />
         </div>
         <div className="flex items-center justify-center gap-1 mt-1">
-          <span className="text-[10px] font-black text-white">{ovr}</span>
+          <span className="text-[10px] font-black" style={{ color: visual.accent }}>{ovr}</span>
           {enhance != null && (
-            <span className="text-[9px] font-black" style={getEnhanceLabelStyle(enhance)}>
+            <span
+              className="text-[9px] font-black px-0.5 rounded"
+              style={{ ...getEnhanceLabelStyle(enhance), background: 'rgba(0,0,0,0.45)' }}
+            >
               +{enhance}
             </span>
           )}

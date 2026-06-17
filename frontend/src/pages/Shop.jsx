@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { SHOP_PASSIVE_SKILLS, SHOP_ACTIVE_SKILLS } from '../constants/shopProducts.js';
 import { GachaPanel } from './Gacha.jsx';
+
 const TABS = [
-  { key: 'all', label: '전체' },
   { key: 'passive', label: '패시브 스킬' },
   { key: 'active', label: '액티브 스킬' },
+  { key: 'content', label: '포인트 콘텐츠' },
 ];
 
 function PointBadge({ points }) {
@@ -112,7 +113,7 @@ function SkillSection({ title, subtitle, icon, skills, ownedIds, points, onBuy }
           <p className="text-xs text-muted">{subtitle}</p>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {skills.map((skill) => {
           const owned = ownedIds.has(skill.id);
           return (
@@ -137,13 +138,10 @@ function SkillSection({ title, subtitle, icon, skills, ownedIds, points, onBuy }
 }
 
 export default function Shop() {
-  const [tab, setTab] = useState('all');
+  const [tab, setTab] = useState('passive');
   const [points, setPoints] = useState(1500);
   const [toast, setToast] = useState('');
   const [inventory, setInventory] = useState({ passive: [], active: [] });
-
-  const showPassive = tab === 'all' || tab === 'passive';
-  const showActive = tab === 'all' || tab === 'active';
 
   const ownedPassiveIds = useMemo(() => new Set(inventory.passive), [inventory.passive]);
   const ownedActiveIds = useMemo(() => new Set(inventory.active), [inventory.active]);
@@ -190,8 +188,8 @@ export default function Shop() {
           <div>
             <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-amber-400/80 mb-1">Point Shop</p>
             <h1 className="text-3xl md:text-4xl font-black text-text">상점</h1>
-            <p className="text-sm text-muted mt-2 max-w-md">
-              리그 포인트로 감독 스킬을 구매하고, 우측에서 선수 뽑기·강화·셔플을 이용합니다.
+            <p className="text-sm text-muted mt-2 max-w-lg">
+              패시브·액티브 스킬 구매와 포인트 콘텐츠(뽑기·강화·셔플)를 탭으로 이용합니다.
             </p>
           </div>
           <PointBadge points={points} />
@@ -214,62 +212,60 @@ export default function Shop() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-8 items-start">
-        <div className="space-y-6 min-w-0">
-          <div className="flex gap-2 flex-wrap">
-            {TABS.map(({ key, label }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setTab(key)}
-                className="px-5 py-2 rounded-full text-sm font-bold transition-all"
-                style={{
-                  background: tab === key ? '#00d97e' : 'rgba(0,217,126,0.08)',
-                  color: tab === key ? '#080c16' : '#00d97e',
-                  border: `1px solid ${tab === key ? '#00d97e' : 'rgba(0,217,126,0.25)'}`,
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+      <div className="flex gap-2 flex-wrap border-b border-border pb-0">
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className="px-5 py-2.5 text-sm font-bold transition-all rounded-t-lg"
+            style={{
+              background: tab === key ? '#0d1526' : 'transparent',
+              color: tab === key ? '#00d97e' : '#5a7490',
+              borderBottom: tab === key ? '2px solid #00d97e' : '2px solid transparent',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
-          {showPassive && (
-            <SkillSection
-              title="패시브 스킬"
-              subtitle="구매 후 지속 적용 · 120P"
-              icon="🛡️"
-              skills={SHOP_PASSIVE_SKILLS}
-              ownedIds={ownedPassiveIds}
-              points={points}
-              onBuy={buySkill}
-            />
-          )}
+      {tab === 'passive' && (
+        <SkillSection
+          title="패시브 스킬"
+          subtitle="구매 후 지속 적용 · 120P"
+          icon="🛡️"
+          skills={SHOP_PASSIVE_SKILLS}
+          ownedIds={ownedPassiveIds}
+          points={points}
+          onBuy={buySkill}
+        />
+      )}
 
-          {showActive && (
-            <SkillSection
-              title="액티브 스킬"
-              subtitle="경기 중 발동 · 사용 후 소모 · 60P"
-              icon="⚡"
-              skills={SHOP_ACTIVE_SKILLS}
-              ownedIds={ownedActiveIds}
-              points={points}
-              onBuy={buySkill}
-            />
-          )}
-        </div>
+      {tab === 'active' && (
+        <SkillSection
+          title="액티브 스킬"
+          subtitle="경기 중 발동 · 사용 후 소모 · 60P"
+          icon="⚡"
+          skills={SHOP_ACTIVE_SKILLS}
+          ownedIds={ownedActiveIds}
+          points={points}
+          onBuy={buySkill}
+        />
+      )}
 
-        <aside
-          className="xl:sticky xl:top-20 xl:max-h-[calc(100vh-5.5rem)] xl:overflow-y-auto rounded-2xl border p-5 space-y-4"
+      {tab === 'content' && (
+        <div
+          className="rounded-2xl border p-6 md:p-8"
           style={{
-            background: 'linear-gradient(160deg, #0d1526 0%, #111e38 55%, #0d1f20 100%)',
-            borderColor: 'rgba(0,217,126,0.2)',
-            boxShadow: '0 0 32px rgba(0,217,126,0.06)',
+            background: 'linear-gradient(160deg, #0a0e18 0%, #0d1526 40%, #111e38 100%)',
+            borderColor: 'rgba(0,217,126,0.25)',
+            boxShadow: '0 0 48px rgba(0,217,126,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
           }}
         >
-          <GachaPanel />
-        </aside>
-      </div>
+          <GachaPanel fullWidth />
+        </div>
+      )}
 
       <Toast message={toast} onClose={() => setToast('')} />
     </div>
