@@ -1,7 +1,16 @@
 import { useState, useRef } from 'react';
 import { PlayerCard } from '../components/PlayerCard.jsx';
 import { PlayerSlot } from '../components/PlayerSlot.jsx';
+import { Emblem } from '../components/Emblem.jsx';
 import { getEnhanceColor, getOvrSlotStyle, getPositionColor } from '../constants/playerColors.js';
+import {
+  MANAGER_NAMES,
+  SAMPLE_CURRENT_MANAGER,
+  getManagerPointsMap,
+  calcSoulBonusRate,
+  SOUL_POINT_STEP,
+  formatPoints,
+} from '../constants/managerPoints.js';
 
 // ── 상수 ──────────────────────────────────────────────────────────────────────
 const RARITY = {
@@ -82,7 +91,7 @@ const ALL_PLAYERS = [
   { name:'조르지뉴',      pos:'CM',  ovr:84, season:'22-23' },
   { name:'막시모비치',    pos:'CM',  ovr:82, season:'22-23' },
 ];
-const MANAGERS = ['영동','준현','종성','민혁','삼주','영모','진수','기성'];
+const MANAGERS = MANAGER_NAMES;
 const SEASONS  = ['22-23','23-24','24-25'];
 
 // ── 공통 ──────────────────────────────────────────────────────────────────────
@@ -97,8 +106,17 @@ function TabBtn({ id, label, active, onClick }) {
 }
 
 export default function Gacha() {
-  const [tab, setTab]       = useState('draw');
-  const [points, setPoints] = useState(2000);
+  const [tab, setTab] = useState('draw');
+  const [managerPoints, setManagerPoints] = useState(() => ({ ...getManagerPointsMap() }));
+  const currentUser = SAMPLE_CURRENT_MANAGER;
+  const points = managerPoints[currentUser];
+
+  const setMyPoints = (updater) => {
+    setManagerPoints((mp) => ({
+      ...mp,
+      [currentUser]: typeof updater === 'function' ? updater(mp[currentUser]) : updater,
+    }));
+  };
 
   return (
     <>
@@ -121,10 +139,13 @@ export default function Gacha() {
 
       <div className="max-w-2xl mx-auto space-y-5">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-black">포인트 상점</h1>
+          <div>
+            <h1 className="text-2xl font-black">포인트 상점</h1>
+            <p className="text-xs text-muted mt-0.5">{currentUser} 감독</p>
+          </div>
           <div className="text-right">
             <p className="text-xs uppercase tracking-widest" style={{ color:'#5a7490' }}>보유 포인트</p>
-            <p className="text-2xl font-black" style={{ color:'#00d97e' }}>{points.toLocaleString()}P</p>
+            <p className="text-2xl font-black" style={{ color:'#00d97e' }}>{formatPoints(points)}</p>
           </div>
         </div>
 
@@ -134,9 +155,16 @@ export default function Gacha() {
           <TabBtn id="shuffle" label="선수 셔플" active={tab} onClick={setTab} />
         </div>
 
-        {tab === 'draw'    && <DrawSection    points={points} setPoints={setPoints} />}
-        {tab === 'enhance' && <EnhanceSection points={points} setPoints={setPoints} />}
-        {tab === 'shuffle' && <ShuffleSection points={points} setPoints={setPoints} />}
+        {tab === 'draw'    && <DrawSection    points={points} setPoints={setMyPoints} />}
+        {tab === 'enhance' && (
+          <EnhanceSection
+            points={points}
+            currentUser={currentUser}
+            managerPoints={managerPoints}
+            setManagerPoints={setManagerPoints}
+          />
+        )}
+        {tab === 'shuffle' && <ShuffleSection points={points} setPoints={setMyPoints} />}
       </div>
     </>
   );
@@ -244,10 +272,97 @@ function DrawSection({ points, setPoints }) {
 }
 
 // ── 탭2: 강화 시도 ────────────────────────────────────────────────────────────
-function EnhanceSection({ points, setPoints }) {
+function SoulSupportPanel({ currentUser, managerPoints, soulSupport, setSoulSupport, disabled }) {
+  const helpers = MANAGER_NAMES.filter((n) => n !== currentUser);
+  const totalSoul = helpers.reduce((sum, name) => sum + (soulSupport[name] || 0), 0);
+  const bonus = calcSoulBonusRate(totalSoul);
+
+  const adjust = (name, delta) => {
+    setSoulSupport((prev) => {
+      const cur = prev[name] || 0;
+      const max = managerPoints[name];
+      return { ...prev, [name]: Math.max(0, Math.min(cur + delta, max)) };
+    });
+  };
+
+  return (
+    <div
+      className="w-full rounded-xl p-4 space-y-3"
+      style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.35)' }}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-xs font-black uppercase tracking-wider" style={{ color: '#c084fc' }}>
+            👻 영혼보내기
+          </p>
+          <p className="text-[11px] text-muted mt-1 leading-relaxed">
+            다른 감독이 10P 지원 시 성공률 +5% · 성공/실패 무관하게 지원 포인트 차감
+          </p>
+        </div>
+        {bonus > 0 && (
+          <span className="shrink-0 px-2 py-1 rounded-lg text-sm font-black text-accent bg-accent/10 border border-accent/30">
+            +{bonus}%
+          </span>
+        )}
+      </div>
+      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+        {helpers.map((name) => {
+          const pledged = soulSupport[name] || 0;
+          const canAdd = !disabled && pledged + SOUL_POINT_STEP <= managerPoints[name];
+          const canSub = !disabled && pledged >= SOUL_POINT_STEP;
+          return (
+            <div
+              key={name}
+              className="flex items-center gap-2 p-2.5 rounded-lg"
+              style={{ background: pledged > 0 ? 'rgba(168,85,247,0.12)' : 'rgba(0,0,0,0.2)' }}
+            >
+              <Emblem name={name} size={32} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold">{name}</p>
+                <p className="text-[10px] text-muted">보유 {formatPoints(managerPoints[name])}</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={!canSub}
+                  onClick={() => adjust(name, -SOUL_POINT_STEP)}
+                  className="w-7 h-7 rounded-md text-sm font-black disabled:opacity-30"
+                  style={{ background: '#141f35', color: '#e2eaf5', border: '1px solid #1e2d45' }}
+                >
+                  −
+                </button>
+                <span className="w-12 text-center text-sm font-black tabular-nums" style={{ color: pledged ? '#c084fc' : '#5a7490' }}>
+                  {pledged}P
+                </span>
+                <button
+                  type="button"
+                  disabled={!canAdd}
+                  onClick={() => adjust(name, SOUL_POINT_STEP)}
+                  className="w-7 h-7 rounded-md text-sm font-black disabled:opacity-30"
+                  style={{ background: '#a855f7', color: '#080c16' }}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {totalSoul > 0 && (
+        <p className="text-[10px] text-center text-muted border-t border-border/40 pt-2">
+          영혼 합계 <span className="font-black text-accent">{totalSoul}P</span> · 확률 보너스{' '}
+          <span className="font-black" style={{ color: '#c084fc' }}>+{bonus}%</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints }) {
   const [squad, setSquad]       = useState(INIT_SQUAD.map(p => ({...p})));
   const [selId, setSelId]       = useState(null);
-  const [phase, setPhase]       = useState('idle'); // idle|trying|success|fail
+  const [phase, setPhase]       = useState('idle');
+  const [soulSupport, setSoulSupport] = useState({});
   const timer = useRef(null);
 
   const player = squad.find(p => p.id === selId);
@@ -255,12 +370,28 @@ function EnhanceSection({ points, setPoints }) {
   const maxed  = player && player.enhance >= 11;
   const enhBorder = player ? getEnhanceColor(player.enhance) : null;
 
+  const totalSoul = Object.values(soulSupport).reduce((a, b) => a + b, 0);
+  const soulBonus = calcSoulBonusRate(totalSoul);
+  const effectiveRate = cfg ? Math.min(100, cfg.rate + soulBonus) : 0;
+
+  const soulValid = Object.entries(soulSupport).every(([name, amt]) => amt <= managerPoints[name]);
+
   const tryEnhance = () => {
-    if (!player || !cfg || points < cfg.cost || phase !== 'idle') return;
-    setPoints(p => p - cfg.cost);
+    if (!player || !cfg || points < cfg.cost || phase !== 'idle' || !soulValid) return;
+    const pledged = { ...soulSupport };
+
+    setManagerPoints((mp) => {
+      const next = { ...mp, [currentUser]: mp[currentUser] - cfg.cost };
+      Object.entries(pledged).forEach(([name, amt]) => {
+        if (amt > 0) next[name] = next[name] - amt;
+      });
+      return next;
+    });
+    setSoulSupport({});
     setPhase('trying');
+
     timer.current = setTimeout(() => {
-      const ok = Math.random() * 100 < cfg.rate;
+      const ok = Math.random() * 100 < effectiveRate;
       setPhase(ok ? 'success' : 'fail');
       if (ok) setSquad(sq => sq.map(p => p.id === selId ? {...p, enhance:p.enhance+1} : p));
       setTimeout(() => setPhase('idle'), 2200);
@@ -306,17 +437,43 @@ function EnhanceSection({ points, setPoints }) {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted">성공 확률</span>
-                  <span className="font-black text-accent">{cfg.rate}%</span>
+                  <span className="text-sm text-muted">기본 성공률</span>
+                  <span className="font-black text-muted">{cfg.rate}%</span>
+                </div>
+                {soulBonus > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm" style={{ color: '#c084fc' }}>영혼보내기 보너스</span>
+                    <span className="font-black" style={{ color: '#c084fc' }}>+{soulBonus}%</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted">최종 성공률</span>
+                  <span className="font-black text-accent">{effectiveRate}%</span>
                 </div>
                 <div className="h-2 rounded-full overflow-hidden" style={{ background:'#141f35' }}>
-                  <div className="h-full rounded-full" style={{ width:`${cfg.rate}%`, background:'#00d97e' }} />
+                  <div className="h-full rounded-full transition-all" style={{ width:`${effectiveRate}%`, background: soulBonus > 0 ? 'linear-gradient(90deg,#a855f7,#00d97e)' : '#00d97e' }} />
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted">소모 포인트</span>
+                  <span className="text-sm text-muted">내 강화 비용</span>
                   <span className="font-black text-accent">{cfg.cost.toLocaleString()}P</span>
                 </div>
+                {totalSoul > 0 && (
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-muted">영혼보내기 (타 감독 차감)</span>
+                    <span className="font-bold" style={{ color: '#c084fc' }}>{totalSoul.toLocaleString()}P</span>
+                  </div>
+                )}
               </div>
+            )}
+
+            {!maxed && cfg && (
+              <SoulSupportPanel
+                currentUser={currentUser}
+                managerPoints={managerPoints}
+                soulSupport={soulSupport}
+                setSoulSupport={setSoulSupport}
+                disabled={phase !== 'idle'}
+              />
             )}
             {maxed && (
               <div className="w-full text-center py-3 rounded-xl font-bold text-sm"
@@ -326,7 +483,7 @@ function EnhanceSection({ points, setPoints }) {
             )}
 
             <button onClick={tryEnhance}
-              disabled={!cfg || maxed || phase!=='idle' || points<(cfg?.cost||0)}
+              disabled={!cfg || maxed || phase!=='idle' || points<(cfg?.cost||0) || !soulValid}
               className="w-full py-4 rounded-xl font-black text-lg transition-all"
               style={{
                 background: maxed?'#1e2d45': phase==='success'?'#00d97e': phase==='fail'?'rgba(239,68,68,.3)': cfg&&points>=cfg.cost&&phase==='idle'?'#00d97e':'#1e2d45',

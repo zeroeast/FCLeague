@@ -4,6 +4,7 @@ const navItems = [
   { to: '/',              label: '홈' },
   { to: '/league',        label: '리그' },
   { to: '/traits',        label: '특성 투자' },
+  { to: '/shop',          label: '상점' },
   { to: '/teams',         label: '팀' },
   { to: '/players',       label: '선수 검색' },
   { to: '/stats',         label: '통계' },

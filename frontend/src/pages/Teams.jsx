@@ -4,6 +4,9 @@ import { Emblem } from '../components/Emblem.jsx';
 import { PitchFormation } from '../components/PitchFormation.jsx';
 import { pickAbilitiesByName } from '../constants/managerTraits.js';
 import { getFormationPositions } from '../constants/formationLayouts.js';
+import { formatPoints, getManagerPointsMap } from '../constants/managerPoints.js';
+
+const MANAGER_POINTS = getManagerPointsMap();
 
 const MANAGERS = [
   { name:'영동', formation:'4-3-3',   ovr:91, pts:28, squadValue:5_240_000_000,
@@ -183,6 +186,10 @@ export default function Teams() {
               <span className="font-black text-text">{m.pts}pt</span>
             </div>
             <div className="w-full flex justify-between text-xs mt-0.5">
+              <span className="text-muted">보유 포인트</span>
+              <span className="font-black text-accent">{formatPoints(MANAGER_POINTS[m.name])}</span>
+            </div>
+            <div className="w-full flex justify-between text-xs mt-0.5">
               <span className="text-muted">구단가치</span>
               <span className="font-black" style={{ color:'#FFD700' }}>{formatSquadValue(m.squadValue)}</span>
             </div>
@@ -203,6 +210,7 @@ export default function Teams() {
                 <p className="text-sm text-muted">
                   {selected.formation} · 팀 OVR <span className="text-accent font-bold">{selected.ovr}</span>
                   · 승점 <span className="font-bold">{selected.pts}pt</span>
+                  · 보유 포인트 <span className="font-bold text-accent">{formatPoints(MANAGER_POINTS[selected.name])}</span>
                   · 구단가치 <span className="font-bold" style={{ color:'#FFD700' }}>{formatSquadValue(selected.squadValue)} BP</span>
                 </p>
               </div>
