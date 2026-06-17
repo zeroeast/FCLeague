@@ -122,6 +122,29 @@ function AbilityCard({ ability, onHover, onLeave }) {
   );
 }
 
+function SubBenchSlot({ index }) {
+  return (
+    <div
+      className="flex-1 min-w-0 rounded-xl border border-dashed p-3 flex flex-col items-center justify-center gap-1.5 min-h-[88px] transition-colors hover:border-accent/40"
+      style={{
+        background: 'rgba(255,255,255,0.02)',
+        borderColor: 'rgba(90,116,144,0.45)',
+      }}
+    >
+      <span className="text-[9px] font-black uppercase tracking-widest text-muted/70">
+        SUB {index}
+      </span>
+      <div
+        className="w-8 h-8 rounded-lg border border-dashed flex items-center justify-center"
+        style={{ borderColor: 'rgba(90,116,144,0.35)' }}
+      >
+        <span className="text-lg text-muted/40 leading-none">+</span>
+      </div>
+      <p className="text-[10px] text-muted text-center leading-tight">선수 배치</p>
+    </div>
+  );
+}
+
 export default function TeamDetailPanel({ manager, onClose, showClose = true }) {
   const [abilityTooltip, setAbilityTooltip] = useState(null);
   const abilities = useMemo(() => pickAbilitiesByName(manager.name), [manager.name]);
@@ -170,29 +193,53 @@ export default function TeamDetailPanel({ manager, onClose, showClose = true }) 
             />
           </div>
 
-          <div
-            className="p-4 border space-y-3 rounded-xl"
-            style={{
-              background: 'linear-gradient(160deg, rgba(0,217,126,0.06) 0%, rgba(13,21,38,0.95) 45%)',
-              borderColor: 'rgba(0,217,126,0.25)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-            }}
-          >
-            <div>
-              <p className="text-[10px] text-accent uppercase tracking-[0.2em] font-bold">Manager Skill</p>
-              <p className="text-sm font-black text-text">감독 스킬</p>
+          <div className="space-y-4">
+            <div
+              className="p-4 border space-y-3 rounded-xl"
+              style={{
+                background: 'linear-gradient(160deg, rgba(0,217,126,0.06) 0%, rgba(13,21,38,0.95) 45%)',
+                borderColor: 'rgba(0,217,126,0.25)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+              }}
+            >
+              <div>
+                <p className="text-[10px] text-accent uppercase tracking-[0.2em] font-bold">Manager Skill</p>
+                <p className="text-sm font-black text-text">감독 스킬</p>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 max-h-[360px] overflow-y-auto pr-1">
+                {abilities.map((ability) => (
+                  <AbilityCard
+                    key={`${manager.name}-${ability.id}`}
+                    ability={ability}
+                    onHover={(ab, rect) => setAbilityTooltip({ ability: ab, rect })}
+                    onLeave={() => setAbilityTooltip(null)}
+                  />
+                ))}
+              </div>
+              <p className="text-[10px] text-muted text-center">카드에 마우스를 올리면 상세 설명이 표시됩니다</p>
             </div>
-            <div className="grid grid-cols-1 gap-2.5 max-h-[480px] overflow-y-auto pr-1">
-              {abilities.map((ability) => (
-                <AbilityCard
-                  key={`${manager.name}-${ability.id}`}
-                  ability={ability}
-                  onHover={(ab, rect) => setAbilityTooltip({ ability: ab, rect })}
-                  onLeave={() => setAbilityTooltip(null)}
-                />
-              ))}
+
+            <div
+              className="p-4 border space-y-3 rounded-xl"
+              style={{
+                background: 'linear-gradient(160deg, rgba(56,189,248,0.05) 0%, rgba(13,21,38,0.95) 45%)',
+                borderColor: 'rgba(56,189,248,0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.2em] font-bold" style={{ color: '#38bdf8' }}>
+                  Substitutes
+                </p>
+                <p className="text-sm font-black text-text">서브 명단</p>
+              </div>
+              <div className="flex gap-2">
+                {[1, 2, 3].map((n) => (
+                  <SubBenchSlot key={n} index={n} />
+                ))}
+              </div>
+              <p className="text-[10px] text-muted text-center">교체 선수 최대 3명 배치 가능</p>
             </div>
-            <p className="text-[10px] text-muted text-center">카드에 마우스를 올리면 상세 설명이 표시됩니다</p>
           </div>
         </div>
       </div>

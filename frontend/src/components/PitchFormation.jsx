@@ -1,6 +1,6 @@
 import { getFormationCoords } from '../constants/formationLayouts.js';
 import {
-  getEnhanceColor,
+  getEnhanceLabelStyle,
   getOvrSlotStyle,
   getPositionColor,
 } from '../constants/playerColors.js';
@@ -32,7 +32,7 @@ function PitchPlayer({ name, pos, ovr, enhance }) {
         <div className="flex items-center justify-center gap-1 mt-1">
           <span className="text-[10px] font-black text-white">{ovr}</span>
           {enhance != null && (
-            <span className="text-[9px] font-black" style={{ color: getEnhanceColor(enhance) }}>
+            <span className="text-[9px] font-black" style={getEnhanceLabelStyle(enhance)}>
               +{enhance}
             </span>
           )}

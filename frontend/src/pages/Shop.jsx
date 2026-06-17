@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { SHOP_PASSIVE_SKILLS, SHOP_ACTIVE_SKILLS } from '../constants/shopProducts.js';
-
+import { GachaPanel } from './Gacha.jsx';
 const TABS = [
   { key: 'all', label: '전체' },
   { key: 'passive', label: '패시브 스킬' },
@@ -112,7 +112,7 @@ function SkillSection({ title, subtitle, icon, skills, ownedIds, points, onBuy }
           <p className="text-xs text-muted">{subtitle}</p>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {skills.map((skill) => {
           const owned = ownedIds.has(skill.id);
           return (
@@ -191,8 +191,7 @@ export default function Shop() {
             <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-amber-400/80 mb-1">Point Shop</p>
             <h1 className="text-3xl md:text-4xl font-black text-text">상점</h1>
             <p className="text-sm text-muted mt-2 max-w-md">
-              리그 포인트로 감독(팀)의 패시브·액티브 스킬을 구매합니다.
-              액티브 스킬은 경기에서 발동 후 소모됩니다.
+              리그 포인트로 감독 스킬을 구매하고, 우측에서 선수 뽑기·강화·셔플을 이용합니다.
             </p>
           </div>
           <PointBadge points={points} />
@@ -215,47 +214,62 @@ export default function Shop() {
         </div>
       </section>
 
-      <div className="flex gap-2 flex-wrap">
-        {TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className="px-5 py-2 rounded-full text-sm font-bold transition-all"
-            style={{
-              background: tab === key ? '#00d97e' : 'rgba(0,217,126,0.08)',
-              color: tab === key ? '#080c16' : '#00d97e',
-              border: `1px solid ${tab === key ? '#00d97e' : 'rgba(0,217,126,0.25)'}`,
-            }}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-8 items-start">
+        <div className="space-y-6 min-w-0">
+          <div className="flex gap-2 flex-wrap">
+            {TABS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className="px-5 py-2 rounded-full text-sm font-bold transition-all"
+                style={{
+                  background: tab === key ? '#00d97e' : 'rgba(0,217,126,0.08)',
+                  color: tab === key ? '#080c16' : '#00d97e',
+                  border: `1px solid ${tab === key ? '#00d97e' : 'rgba(0,217,126,0.25)'}`,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {showPassive && (
+            <SkillSection
+              title="패시브 스킬"
+              subtitle="구매 후 지속 적용 · 120P"
+              icon="🛡️"
+              skills={SHOP_PASSIVE_SKILLS}
+              ownedIds={ownedPassiveIds}
+              points={points}
+              onBuy={buySkill}
+            />
+          )}
+
+          {showActive && (
+            <SkillSection
+              title="액티브 스킬"
+              subtitle="경기 중 발동 · 사용 후 소모 · 60P"
+              icon="⚡"
+              skills={SHOP_ACTIVE_SKILLS}
+              ownedIds={ownedActiveIds}
+              points={points}
+              onBuy={buySkill}
+            />
+          )}
+        </div>
+
+        <aside
+          className="xl:sticky xl:top-20 xl:max-h-[calc(100vh-5.5rem)] xl:overflow-y-auto rounded-2xl border p-5 space-y-4"
+          style={{
+            background: 'linear-gradient(160deg, #0d1526 0%, #111e38 55%, #0d1f20 100%)',
+            borderColor: 'rgba(0,217,126,0.2)',
+            boxShadow: '0 0 32px rgba(0,217,126,0.06)',
+          }}
+        >
+          <GachaPanel />
+        </aside>
       </div>
-
-      {showPassive && (
-        <SkillSection
-          title="패시브 스킬"
-          subtitle="구매 후 지속 적용 · 120P"
-          icon="🛡️"
-          skills={SHOP_PASSIVE_SKILLS}
-          ownedIds={ownedPassiveIds}
-          points={points}
-          onBuy={buySkill}
-        />
-      )}
-
-      {showActive && (
-        <SkillSection
-          title="액티브 스킬"
-          subtitle="경기 중 발동 · 사용 후 소모 · 60P"
-          icon="⚡"
-          skills={SHOP_ACTIVE_SKILLS}
-          ownedIds={ownedActiveIds}
-          points={points}
-          onBuy={buySkill}
-        />
-      )}
 
       <Toast message={toast} onClose={() => setToast('')} />
     </div>

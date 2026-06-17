@@ -1,6 +1,8 @@
 import {
   getEnhanceColor,
   getEnhanceGlow,
+  getEnhanceLabelStyle,
+  getEnhanceTier,
   getOvrSlotStyle,
   getPositionColor,
 } from '../constants/playerColors.js';
@@ -47,7 +49,9 @@ export function PlayerCard({
         <div
           className="absolute inset-0 pointer-events-none anim-enhance-glow rounded-2xl"
           style={{
-            background: `radial-gradient(ellipse at 50% 45%, ${enhColor}88 0%, rgba(139,92,246,.35) 35%, ${enhColor}22 55%, transparent 75%)`,
+            background: getEnhanceTier(enh) === 'platinum'
+              ? 'radial-gradient(ellipse at 50% 45%, rgba(232,246,255,.75) 0%, rgba(200,220,255,.4) 35%, rgba(245,232,255,.25) 55%, transparent 75%)'
+              : `radial-gradient(ellipse at 50% 45%, ${enhColor}88 0%, ${enhColor}44 35%, ${enhColor}22 55%, transparent 75%)`,
           }}
         />
       )}
@@ -76,10 +80,7 @@ export function PlayerCard({
       <OvrBadge ovr={player.ovr} pos={player.pos} size={large ? 'lg' : 'md'} />
 
       {enh != null && (
-        <span
-          className="text-sm font-black"
-          style={{ color: enhColor }}
-        >
+        <span className="text-sm font-black" style={getEnhanceLabelStyle(enh)}>
           +{enh}
         </span>
       )}

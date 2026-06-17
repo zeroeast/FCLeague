@@ -1,5 +1,5 @@
 import {
-  getEnhanceColor,
+  getEnhanceLabelStyle,
   getOvrSlotStyle,
   getPositionColor,
 } from '../constants/playerColors.js';
@@ -39,7 +39,7 @@ export function PlayerSlot({
           {pos}
         </span>
         {enhance != null && (
-          <span className="text-xs font-black" style={{ color: getEnhanceColor(enhance) }}>
+          <span className="text-xs font-black" style={getEnhanceLabelStyle(enhance)}>
             +{enhance}
           </span>
         )}

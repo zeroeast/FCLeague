@@ -3,7 +3,7 @@ import { PlayerCard } from '../components/PlayerCard.jsx';
 import { PlayerSlot } from '../components/PlayerSlot.jsx';
 import { Emblem } from '../components/Emblem.jsx';
 import { PlayerName } from '../components/PlayerName.jsx';
-import { getEnhanceColor, getOvrSlotStyle, getPositionColor } from '../constants/playerColors.js';
+import { getEnhanceColor, getEnhanceLabelStyle, getOvrSlotStyle, getPositionColor } from '../constants/playerColors.js';
 import { getCardSeason } from '../constants/seasonTags.js';
 import {
   MANAGER_NAMES,
@@ -107,7 +107,7 @@ function TabBtn({ id, label, active, onClick }) {
   );
 }
 
-export default function Gacha() {
+export function GachaPanel({ className = '' }) {
   const [tab, setTab] = useState('draw');
   const [managerPoints, setManagerPoints] = useState(() => ({ ...getManagerPointsMap() }));
   const currentUser = SAMPLE_CURRENT_MANAGER;
@@ -139,19 +139,20 @@ export default function Gacha() {
         .anim-fadein  { animation:fade-in      .4s ease-out forwards }
       `}</style>
 
-      <div className="max-w-2xl mx-auto space-y-5">
-        <div className="flex items-center justify-between">
+      <div className={`space-y-4 ${className}`}>
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-black">포인트 상점</h1>
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent">Point Content</p>
+            <h2 className="text-lg font-black text-text">포인트 콘텐츠</h2>
             <p className="text-xs text-muted mt-0.5">{currentUser} 감독</p>
           </div>
-          <div className="text-right">
-            <p className="text-xs uppercase tracking-widest" style={{ color:'#5a7490' }}>보유 포인트</p>
-            <p className="text-2xl font-black" style={{ color:'#00d97e' }}>{formatPoints(points)}</p>
+          <div className="text-right shrink-0">
+            <p className="text-[10px] uppercase tracking-widest text-muted">보유 포인트</p>
+            <p className="text-xl font-black text-accent">{formatPoints(points)}</p>
           </div>
         </div>
 
-        <div className="flex gap-0 border-b border-border">
+        <div className="flex gap-0 border-b border-border overflow-x-auto">
           <TabBtn id="draw"    label="선수 뽑기" active={tab} onClick={setTab} />
           <TabBtn id="enhance" label="강화 시도" active={tab} onClick={setTab} />
           <TabBtn id="shuffle" label="선수 셔플" active={tab} onClick={setTab} />
@@ -169,6 +170,15 @@ export default function Gacha() {
         {tab === 'shuffle' && <ShuffleSection points={points} setPoints={setMyPoints} />}
       </div>
     </>
+  );
+}
+
+/** @deprecated use GachaPanel inside Shop */
+export default function Gacha() {
+  return (
+    <div className="max-w-2xl mx-auto">
+      <GachaPanel />
+    </div>
   );
 }
 
@@ -434,7 +444,7 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints }
               <div className="w-full rounded-xl p-4 space-y-3" style={{ background:'rgba(255,255,255,.04)', border:'1px solid #1e2d45' }}>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted">목표 강화</span>
-                  <span className="font-black" style={{ color:getEnhanceColor(player.enhance + 1) }}>
+                  <span className="font-black" style={getEnhanceLabelStyle(player.enhance + 1)}>
                     +{player.enhance} → +{player.enhance + 1}
                   </span>
                 </div>
