@@ -111,3 +111,18 @@ export function pickAbilitiesByName(name) {
     .slice(0, count)
     .map(({ ability }) => withDynamicValues(ability, seed));
 }
+
+/** Sample trait level (1~5) until API provides real data */
+export function getTraitLevelForManager(managerName, abilityId) {
+  const seed = seedFromName(managerName);
+  const idHash = abilityId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return 1 + ((seed + idHash) % 5);
+}
+
+export function getManagerAbilitiesWithLevels(name) {
+  return pickAbilitiesByName(name).map((ability) => ({
+    ...ability,
+    level: getTraitLevelForManager(name, ability.id),
+    shortName: ability.name.replace(/ 능력$/, '').replace(/의 달인$/, ' 달인'),
+  }));
+}
