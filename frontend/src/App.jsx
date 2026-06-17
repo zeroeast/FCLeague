@@ -7,6 +7,7 @@ import Players from './pages/Players.jsx';
 import Stats from './pages/Stats.jsx';
 import HallOfFame from './pages/HallOfFame.jsx';
 import Login from './pages/Login.jsx';
+import Gacha from './pages/Gacha.jsx';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="players" element={<Players />} />
         <Route path="stats" element={<Stats />} />
         <Route path="hall-of-fame" element={<HallOfFame />} />
+        <Route path="gacha" element={<Gacha />} />
       </Route>
     </Routes>
   );

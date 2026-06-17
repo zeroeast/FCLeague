@@ -7,6 +7,7 @@ const navItems = [
   { to: '/players',       label: '선수 검색' },
   { to: '/stats',         label: '통계' },
   { to: '/hall-of-fame',  label: '명예의 전당' },
+  { to: '/gacha',         label: '선수 뽑기' },
 ];
 
 export default function Layout() {
@@ -53,7 +54,7 @@ export default function Layout() {
 
       <footer className="border-t border-border text-center text-muted text-xs py-5">
         <span className="text-gradient-green font-bold">FC온라인 리그</span>
-        <span className="ml-2">© 2025 — 우리들만의 리그</span>
+        <span className="ml-2">2025 우리들만의 리그</span>
       </footer>
     </div>
   );
