@@ -103,6 +103,9 @@ const ALL_PLAYERS = [
 const MANAGERS = MANAGER_NAMES;
 const SEASONS  = ['22-23','23-24','24-25'];
 
+/** 프로토타입: 강화·영혼보내기 시 포인트 차감 없음 (디버깅용) */
+const ENHANCE_PROTOTYPE_FREE = true;
+
 // ── 공통 ──────────────────────────────────────────────────────────────────────
 function TabBtn({ id, label, active, onClick }) {
   return (
@@ -452,21 +455,25 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
     };
   }, [phase, curveKey]);
 
+  const canAfford = ENHANCE_PROTOTYPE_FREE || points >= (cfg?.cost ?? 0);
+
   const tryEnhance = () => {
-    if (!player || !cfg || points < cfg.cost || phase !== 'idle' || !soulValid) return;
+    if (!player || !cfg || !canAfford || phase !== 'idle' || !soulValid) return;
 
     const pledged = { ...soulSupport };
     outcomeRef.current = Math.random() * 100 < effectiveRate;
     selIdRef.current = selId;
     effectiveRateRef.current = effectiveRate;
 
-    setManagerPoints((mp) => {
-      const next = { ...mp, [currentUser]: mp[currentUser] - cfg.cost };
-      Object.entries(pledged).forEach(([name, amt]) => {
-        if (amt > 0) next[name] = next[name] - amt;
+    if (!ENHANCE_PROTOTYPE_FREE) {
+      setManagerPoints((mp) => {
+        const next = { ...mp, [currentUser]: mp[currentUser] - cfg.cost };
+        Object.entries(pledged).forEach(([name, amt]) => {
+          if (amt > 0) next[name] = next[name] - amt;
+        });
+        return next;
       });
-      return next;
-    });
+    }
 
     setSoulOrbs(buildSoulOrbs(pledged));
     setCurveKey(pickTensionCurve(Date.now() + (player?.id ?? 0) + totalSoul));
@@ -480,6 +487,14 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
 
   return (
     <div className="space-y-5">
+      {ENHANCE_PROTOTYPE_FREE && (
+        <p
+          className="text-[11px] font-bold text-center py-2 px-3 rounded-lg"
+          style={{ background: 'rgba(245,158,11,0.1)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.3)' }}
+        >
+          프로토타입 모드 — 강화·영혼보내기 포인트 차감 없음
+        </p>
+      )}
       <div className="rounded-2xl border border-border p-4" style={{ background: '#0d1526' }}>
         <p className="text-xs text-muted uppercase tracking-widest font-bold mb-3">내 선수단</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -596,12 +611,12 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
             <button
               type="button"
               onClick={tryEnhance}
-              disabled={!cfg || maxed || phase !== 'idle' || points < (cfg?.cost || 0) || !soulValid}
+              disabled={!cfg || maxed || phase !== 'idle' || !canAfford || !soulValid}
               className="w-full py-4 rounded-xl font-black text-lg transition-all"
               style={{
-                background: maxed ? '#1e2d45' : phase === 'success' ? '#00d97e' : phase === 'fail' ? 'rgba(239,68,68,.3)' : cfg && points >= cfg.cost && phase === 'idle' ? '#00d97e' : '#1e2d45',
-                color: phase === 'success' ? '#080c16' : phase === 'fail' ? '#ef4444' : cfg && points >= (cfg?.cost || 0) && phase === 'idle' && !maxed ? '#080c16' : '#5a7490',
-                cursor: !cfg || maxed || phase !== 'idle' || points < (cfg?.cost || 0) ? 'not-allowed' : 'pointer',
+                background: maxed ? '#1e2d45' : phase === 'success' ? '#00d97e' : phase === 'fail' ? 'rgba(239,68,68,.3)' : cfg && canAfford && phase === 'idle' ? '#00d97e' : '#1e2d45',
+                color: phase === 'success' ? '#080c16' : phase === 'fail' ? '#ef4444' : cfg && canAfford && phase === 'idle' && !maxed ? '#080c16' : '#5a7490',
+                cursor: !cfg || maxed || phase !== 'idle' || !canAfford ? 'not-allowed' : 'pointer',
               }}
             >
               {isTrying
@@ -614,9 +629,11 @@ function EnhanceSection({ points, currentUser, managerPoints, setManagerPoints, 
                       ? 'MAX 강화'
                       : !cfg
                         ? '강화 불가'
-                        : points < cfg.cost
+                        : !canAfford
                           ? '포인트 부족'
-                          : `강화 시도 (${cfg.cost.toLocaleString()}P)`}
+                          : ENHANCE_PROTOTYPE_FREE
+                            ? `강화 시도 (무료 · ${cfg.cost.toLocaleString()}P)`
+                            : `강화 시도 (${cfg.cost.toLocaleString()}P)`}
             </button>
           </div>
         </div>
