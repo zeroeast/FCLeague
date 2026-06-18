@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { SHOP_PASSIVE_SKILLS, SHOP_ACTIVE_SKILLS } from '../constants/shopProducts.js';
 import { GachaPanel } from './Gacha.jsx';
+import { PredictionPanel } from './PredictionPanel.jsx';
 
 const TABS = [
-  { key: 'passive', label: '패시브 스킬' },
-  { key: 'active', label: '액티브 스킬' },
-  { key: 'content', label: '포인트 콘텐츠' },
+  { key: 'passive',    label: '감독 특성' },
+  { key: 'active',     label: '소모 아이템' },
+  { key: 'content',    label: '포인트 콘텐츠' },
+  { key: 'prediction', label: '승부 예측' },
 ];
 
 function PointBadge({ points }) {
@@ -122,7 +124,7 @@ function SkillSection({ title, subtitle, icon, skills, ownedIds, points, onBuy }
               accent={skill.accent}
               glow={skill.glow}
               icon={skill.icon}
-              badge={owned ? '보유' : skill.oneShot ? '액티브' : '패시브'}
+              badge={owned ? '보유' : skill.oneShot ? '소모 아이템' : '감독 특성'}
               title={skill.name}
               subtitle={skill.oneShot ? '발동 후 소모 · 경기당 사용' : '지속 효과 · 소모 없음'}
               price={skill.shopPrice}
@@ -189,7 +191,7 @@ export default function Shop() {
             <p className="text-[10px] uppercase tracking-[0.25em] font-bold text-amber-400/80 mb-1">Point Shop</p>
             <h1 className="text-3xl md:text-4xl font-black text-text">상점</h1>
             <p className="text-sm text-muted mt-2 max-w-lg">
-              패시브·액티브 스킬 구매와 포인트 콘텐츠(뽑기·강화·셔플)를 탭으로 이용합니다.
+              감독 특성·소모 아이템 구매, 포인트 콘텐츠(뽑기·강화·셔플), 승부 예측을 탭으로 이용합니다.
             </p>
           </div>
           <PointBadge points={points} />
@@ -197,8 +199,8 @@ export default function Shop() {
 
         <div className="relative mt-6 flex flex-wrap gap-3">
           {[
-            { label: '패시브 스킬', value: `${inventory.passive.length}개` },
-            { label: '액티브 스킬', value: `${inventory.active.length}개` },
+            { label: '감독 특성', value: `${inventory.passive.length}개` },
+            { label: '소모 아이템', value: `${inventory.active.length}개` },
           ].map(({ label, value }) => (
             <div
               key={label}
@@ -232,7 +234,7 @@ export default function Shop() {
 
       {tab === 'passive' && (
         <SkillSection
-          title="패시브 스킬"
+          title="감독 특성"
           subtitle="구매 후 지속 적용 · 120P"
           icon="🛡️"
           skills={SHOP_PASSIVE_SKILLS}
@@ -244,7 +246,7 @@ export default function Shop() {
 
       {tab === 'active' && (
         <SkillSection
-          title="액티브 스킬"
+          title="소모 아이템"
           subtitle="경기 중 발동 · 사용 후 소모 · 60P"
           icon="⚡"
           skills={SHOP_ACTIVE_SKILLS}
@@ -265,6 +267,13 @@ export default function Shop() {
         >
           <GachaPanel fullWidth />
         </div>
+      )}
+
+      {tab === 'prediction' && (
+        <PredictionPanel
+          points={points}
+          onSpend={(cost, onSuccess) => purchase(cost, onSuccess, '승부예측')}
+        />
       )}
 
       <Toast message={toast} onClose={() => setToast('')} />

@@ -12,6 +12,7 @@ import Stats from './pages/Stats.jsx';
 import HallOfFame from './pages/HallOfFame.jsx';
 import Login from './pages/Login.jsx';
 import Shop from './pages/Shop.jsx';
+import Wallet from './pages/Wallet.jsx';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="stats" element={<Stats />} />
         <Route path="hall-of-fame" element={<HallOfFame />} />
         <Route path="shop" element={<Shop />} />
+        <Route path="wallet" element={<Wallet />} />
 
         {/* legacy redirects */}
         <Route path="traits" element={<Navigate to="/shop" replace />} />

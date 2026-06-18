@@ -8,6 +8,7 @@ const navItems = [
   { to: '/stats',         label: '통계' },
   { to: '/hall-of-fame',  label: '명예의 전당' },
   { to: '/shop',          label: '상점' },
+  { to: '/wallet',        label: '포인트 히스토리' },
 ];
 
 export default function Layout() {
