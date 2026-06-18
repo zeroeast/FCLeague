@@ -271,7 +271,7 @@ const BASE_ENHANCE_RATE = {
 function getFinalEnhanceRate(targetLevel, managerName, soulPointsSpent) {
   const base = BASE_ENHANCE_RATE[targetLevel] ?? 0;
 
-  // enhance-master 패시브 특성 보너스
+  // enhance-master 감독 특성 보너스
   const traits = getManagerAbilitiesWithLevels(managerName);
   const master = traits.find(t => t.id === 'enhance-master');
   const traitBonus = master ? master.enhanceRate : 0;
@@ -315,7 +315,7 @@ const picked = [...ABILITY_POOL]
   .sort((a, b) => a.rank - b.rank)
   .slice(0, count);
 
-// 4. 패시브 특성 동적 수치 적용 (seed 기반)
+// 4. 감독 특성 동적 수치 적용 (seed 기반)
 ```
 
 ---

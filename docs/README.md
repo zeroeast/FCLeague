@@ -23,14 +23,16 @@ docs/
 │       ├── panel-players.md
 │       ├── panel-stats.md
 │       ├── panel-hall-of-fame.md
-│       ├── panel-shop-gacha.md        ← 상점 (뽑기/강화/특성/승부예측 탭)
+│       ├── panel-shop-gacha.md        ← 상점 (뽑기/강화/특성구매/승부예측 탭)
 │       ├── panel-prediction.md        ← 승부 예측 탭 상세
 │       ├── panel-point-history.md     ← 포인트 히스토리 페이지
 │       └── panel-traits.md
 │
-└── 03-operations/                     ← 운용문서
-    ├── 03a-rulebook.md                ← 규정집
-    └── 03b-feature-specs.md           ← 기능별 세부 규정 및 계산식
+├── 03-operations/                     ← 운용문서
+│   ├── 03a-rulebook.md                ← 규정집
+│   └── 03b-feature-specs.md           ← 기능별 세부 규정 및 계산식
+│
+└── 작업로그.md
 ```
 
 ---
