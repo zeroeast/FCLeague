@@ -1,52 +1,99 @@
 import { useState } from 'react';
-import { Emblem } from '../components/Emblem.jsx';
 
-// ── 샘플 데이터 ──────────────────────────────────────────────────────────────
+// ── 샘플 데이터 (실제 축구 경기 — FC 리그 경기 아님) ───────────────────────────
 const EVENTS = [
   {
     id: 1,
-    home: '영동', away: '종성', date: '07-06', round: '11라운드',
+    tournament: '2026 FIFA 월드컵',
+    stage: '16강',
+    home: '대한민국',
+    away: '일본',
+    homeFlag: '🇰🇷',
+    awayFlag: '🇯🇵',
+    date: '07-01',
+    kickoff: '21:00',
+    deadline: '07-01 21:00',
     status: 'open',
-    odds: { home: 1.6, draw: 3.2, away: 2.8 },
-    pool: { home: 450, draw: 120, away: 280 },
+    odds: { home: 2.1, draw: 3.3, away: 2.8 },
+    pool: { home: 820, draw: 240, away: 510 },
   },
   {
     id: 2,
-    home: '준현', away: '민혁', date: '07-06', round: '11라운드',
+    tournament: '2026 FIFA 월드컵',
+    stage: '16강',
+    home: '브라질',
+    away: '아르헨티나',
+    homeFlag: '🇧🇷',
+    awayFlag: '🇦🇷',
+    date: '07-02',
+    kickoff: '04:00',
+    deadline: '07-02 04:00',
     status: 'open',
-    odds: { home: 1.8, draw: 3.0, away: 2.4 },
-    pool: { home: 300, draw: 90, away: 220 },
+    odds: { home: 2.4, draw: 3.1, away: 2.6 },
+    pool: { home: 640, draw: 190, away: 580 },
   },
   {
     id: 3,
-    home: '삼주', away: '영모', date: '07-13', round: '12라운드',
+    tournament: '2026 FIFA 월드컵',
+    stage: '8강',
+    home: '프랑스',
+    away: '독일',
+    homeFlag: '🇫🇷',
+    awayFlag: '🇩🇪',
+    date: '07-05',
+    kickoff: '00:00',
+    deadline: '07-05 00:00',
     status: 'open',
-    odds: { home: 2.1, draw: 2.9, away: 2.0 },
-    pool: { home: 150, draw: 60, away: 200 },
+    odds: { home: 2.0, draw: 3.2, away: 3.0 },
+    pool: { home: 420, draw: 150, away: 310 },
   },
   {
     id: 4,
-    home: '영동', away: '준현', date: '06-29', round: '10라운드',
+    tournament: '2026 FIFA 월드컵',
+    stage: '조별리그',
+    home: '스페인',
+    away: '이탈리아',
+    homeFlag: '🇪🇸',
+    awayFlag: '🇮🇹',
+    date: '06-15',
+    kickoff: '04:00',
+    deadline: '06-15 04:00',
     status: 'settled',
-    odds: { home: 1.5, draw: 3.5, away: 3.0 },
-    result: 'home',
-    pool: { home: 600, draw: 150, away: 200 },
+    odds: { home: 2.2, draw: 3.0, away: 2.9 },
+    result: 'draw',
+    pool: { home: 500, draw: 280, away: 360 },
   },
   {
     id: 5,
-    home: '종성', away: '민혁', date: '06-29', round: '10라운드',
+    tournament: '2026 FIFA 월드컵',
+    stage: '조별리그',
+    home: '네덜란드',
+    away: '벨기에',
+    homeFlag: '🇳🇱',
+    awayFlag: '🇧🇪',
+    date: '06-12',
+    kickoff: '22:00',
+    deadline: '06-12 22:00',
     status: 'settled',
-    odds: { home: 2.0, draw: 2.8, away: 2.2 },
-    result: 'draw',
-    pool: { home: 200, draw: 180, away: 250 },
+    odds: { home: 1.9, draw: 3.4, away: 3.2 },
+    result: 'home',
+    pool: { home: 710, draw: 180, away: 220 },
   },
   {
     id: 6,
-    home: '삼주', away: '진수', date: '06-22', round: '9라운드',
+    tournament: 'UEFA 챔피언스리그',
+    stage: '결승',
+    home: '레알 마드리드',
+    away: 'PSG',
+    homeFlag: '🇪🇸',
+    awayFlag: '🇫🇷',
+    date: '06-01',
+    kickoff: '04:00',
+    deadline: '06-01 04:00',
     status: 'settled',
-    odds: { home: 1.7, draw: 3.1, away: 2.6 },
+    odds: { home: 2.1, draw: 3.2, away: 2.7 },
     result: 'home',
-    pool: { home: 400, draw: 100, away: 180 },
+    pool: { home: 920, draw: 210, away: 480 },
   },
 ];
 
@@ -57,13 +104,27 @@ const STATUS_META = {
   cancelled: { label: '취소',      color: '#6b7280', bg: 'rgba(107,114,128,0.12)', border: 'rgba(107,114,128,0.3)' },
 };
 
-const CHOICES = [
-  { key: 'home',  label: '홈 승',    accentKey: '#00d97e' },
-  { key: 'draw',  label: '무승부',   accentKey: '#f59e0b' },
-  { key: 'away',  label: '원정 승',  accentKey: '#f87171' },
-];
+const CHOICE_ACCENTS = {
+  home: '#00d97e',
+  draw: '#f59e0b',
+  away: '#f87171',
+};
 
 const MIN_BET = 50;
+
+function getChoices(event) {
+  return [
+    { key: 'home', label: `${event.home} 승`, accent: CHOICE_ACCENTS.home },
+    { key: 'draw', label: '무승부', accent: CHOICE_ACCENTS.draw },
+    { key: 'away', label: `${event.away} 승`, accent: CHOICE_ACCENTS.away },
+  ];
+}
+
+function resultLabel(event) {
+  if (event.result === 'home') return `${event.home} 승`;
+  if (event.result === 'away') return `${event.away} 승`;
+  return '무승부';
+}
 
 // ── 서브 컴포넌트 ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
@@ -78,18 +139,37 @@ function StatusBadge({ status }) {
   );
 }
 
-function OddsBtn({ choiceKey, label, odds, selected, settled, result, onSelect, disabled }) {
+function TeamBadge({ flag, name, size = 48 }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div
+        className="rounded-full flex items-center justify-center"
+        style={{
+          width: size,
+          height: size,
+          fontSize: size * 0.55,
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+        }}
+      >
+        {flag}
+      </div>
+      <span className="text-sm font-black text-text text-center leading-tight">{name}</span>
+    </div>
+  );
+}
+
+function OddsBtn({ choiceKey, label, odds, accent, selected, settled, result, onSelect, disabled }) {
   const isWin    = settled && result === choiceKey;
   const isLose   = settled && result && result !== choiceKey;
   const isActive = selected && !settled;
-
-  const accent = CHOICES.find((c) => c.key === choiceKey)?.accentKey ?? '#00d97e';
 
   let bg = 'rgba(255,255,255,0.04)';
   let border = '#1e2d45';
   let color = '#5a7490';
 
-  if (isWin)    { bg = `${accent}22`; border = `${accent}88`; color = accent; }
+  if (isWin)       { bg = `${accent}22`; border = `${accent}88`; color = accent; }
   else if (isLose) { bg = 'rgba(0,0,0,0.2)'; color = '#2a3a55'; }
   else if (isActive) { bg = `${accent}18`; border = accent; color = accent; }
 
@@ -98,10 +178,12 @@ function OddsBtn({ choiceKey, label, odds, selected, settled, result, onSelect, 
       type="button"
       disabled={disabled || settled}
       onClick={() => !settled && onSelect(choiceKey)}
-      className="flex-1 rounded-xl py-3 flex flex-col items-center gap-0.5 transition-all"
+      className="flex-1 rounded-xl py-3 px-1 flex flex-col items-center gap-0.5 transition-all"
       style={{ background: bg, border: `1px solid ${border}`, cursor: settled ? 'default' : 'pointer' }}
     >
-      <span className="text-[10px] font-bold" style={{ color: isLose ? '#2a3a55' : '#5a7490' }}>{label}</span>
+      <span className="text-[10px] font-bold text-center leading-tight" style={{ color: isLose ? '#2a3a55' : '#5a7490' }}>
+        {label}
+      </span>
       <span className="text-lg font-black tabular-nums" style={{ color }}>{odds.toFixed(1)}</span>
       {isWin && <span className="text-[9px] font-black" style={{ color: accent }}>★ 적중</span>}
     </button>
@@ -109,29 +191,27 @@ function OddsBtn({ choiceKey, label, odds, selected, settled, result, onSelect, 
 }
 
 function EventCard({ event, myBet, onBet, onSpend, points }) {
-  const [selChoice, setSelChoice]   = useState(null);
-  const [amountStr, setAmountStr]   = useState('');
-  const [confirmed, setConfirmed]   = useState(false);
+  const [selChoice, setSelChoice] = useState(null);
+  const [amountStr, setAmountStr] = useState('');
 
+  const choices   = getChoices(event);
   const isOpen    = event.status === 'open';
   const isSettled = event.status === 'settled';
   const hasBet    = !!myBet;
 
-  const amount  = parseInt(amountStr, 10) || 0;
-  const payout  = selChoice ? Math.floor(amount * event.odds[selChoice]) : 0;
-  const canBet  = selChoice && amount >= MIN_BET && amount <= points && !hasBet;
+  const amount = parseInt(amountStr, 10) || 0;
+  const payout = selChoice ? Math.floor(amount * event.odds[selChoice]) : 0;
+  const canBet = selChoice && amount >= MIN_BET && amount <= points && !hasBet;
 
   const handleConfirm = () => {
     if (!canBet) return;
     onSpend(amount, () => {
       onBet(event.id, { choice: selChoice, amount });
-      setConfirmed(true);
       setSelChoice(null);
       setAmountStr('');
     });
   };
 
-  // payout for my settled bet
   const myPayout = hasBet && isSettled
     ? (myBet.choice === event.result ? Math.floor(myBet.amount * event.odds[myBet.choice]) : 0)
     : null;
@@ -146,51 +226,51 @@ function EventCard({ event, myBet, onBet, onSpend, points }) {
         borderColor: isOpen ? 'rgba(0,217,126,0.2)' : 'rgba(255,255,255,0.07)',
       }}
     >
-      {/* 헤더 */}
       <div
-        className="flex items-center justify-between px-4 py-3 border-b"
+        className="flex items-center justify-between px-4 py-3 border-b gap-3"
         style={{ borderColor: 'rgba(255,255,255,0.06)' }}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-muted">{event.round}</span>
-          <span className="text-[10px] text-muted">·</span>
-          <span className="text-[10px] text-muted">{event.date}</span>
+        <div className="min-w-0">
+          <p className="text-xs font-black text-text truncate">
+            🏆 {event.tournament}
+          </p>
+          <p className="text-[10px] text-muted mt-0.5">
+            {event.stage} · {event.date} {event.kickoff} 킥오프
+          </p>
         </div>
         <StatusBadge status={event.status} />
       </div>
 
       <div className="p-4 space-y-4">
-        {/* 팀 대결 */}
         <div className="flex items-center justify-center gap-4">
-          <div className="flex flex-col items-center gap-1.5">
-            <Emblem name={event.home} size={40} />
-            <span className="text-sm font-black text-text">{event.home}</span>
-          </div>
-          <div className="flex flex-col items-center">
+          <TeamBadge flag={event.homeFlag} name={event.home} />
+          <div className="flex flex-col items-center shrink-0">
             <span className="text-[10px] text-muted uppercase tracking-widest font-bold">vs</span>
+            {isOpen && (
+              <span className="mt-1 text-[10px] font-bold text-muted">
+                마감 {event.deadline}
+              </span>
+            )}
             {isSettled && (
               <span
                 className="mt-1 text-xs font-black px-2 py-0.5 rounded-full"
                 style={{ color: '#60a5fa', background: 'rgba(96,165,250,0.12)', border: '1px solid rgba(96,165,250,0.3)' }}
               >
-                {event.result === 'home' ? `${event.home} 승` : event.result === 'away' ? `${event.away} 승` : '무승부'}
+                {resultLabel(event)}
               </span>
             )}
           </div>
-          <div className="flex flex-col items-center gap-1.5">
-            <Emblem name={event.away} size={40} />
-            <span className="text-sm font-black text-text">{event.away}</span>
-          </div>
+          <TeamBadge flag={event.awayFlag} name={event.away} />
         </div>
 
-        {/* 배당 버튼 */}
         <div className="flex gap-2">
-          {CHOICES.map(({ key, label }) => (
+          {choices.map(({ key, label, accent }) => (
             <OddsBtn
               key={key}
               choiceKey={key}
               label={label}
               odds={event.odds[key]}
+              accent={accent}
               selected={selChoice === key}
               settled={isSettled}
               result={event.result}
@@ -204,39 +284,36 @@ function EventCard({ event, myBet, onBet, onSpend, points }) {
           ))}
         </div>
 
-        {/* 총 참여 풀 */}
         <div className="flex items-center justify-between text-[11px] text-muted">
           <span>총 참여 포인트</span>
           <span className="font-bold text-text">{totalPool.toLocaleString()}P</span>
         </div>
 
-        {/* 내가 이미 예측한 경우 */}
         {hasBet && (
           <div
             className="rounded-xl px-4 py-3 space-y-1"
             style={{ background: 'rgba(0,217,126,0.07)', border: '1px solid rgba(0,217,126,0.2)' }}
           >
             <p className="text-[11px] font-bold text-accent">내 예측</p>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm gap-2">
               <span className="text-muted">
-                {CHOICES.find((c) => c.key === myBet.choice)?.label} · {myBet.amount.toLocaleString()}P
+                {choices.find((c) => c.key === myBet.choice)?.label} · {myBet.amount.toLocaleString()}P
               </span>
               {isSettled && myPayout !== null && (
                 <span
-                  className="font-black"
+                  className="font-black shrink-0"
                   style={{ color: myPayout > 0 ? '#00d97e' : '#f87171' }}
                 >
                   {myPayout > 0 ? `+${myPayout.toLocaleString()}P 적중!` : '낙선'}
                 </span>
               )}
               {!isSettled && (
-                <span className="text-[10px] font-bold text-muted">정산 대기 중</span>
+                <span className="text-[10px] font-bold text-muted shrink-0">정산 대기 중</span>
               )}
             </div>
           </div>
         )}
 
-        {/* 베팅 입력 폼 (오픈 + 선택 + 미배팅) */}
         {isOpen && selChoice && !hasBet && (
           <div
             className="rounded-xl p-3 space-y-3"
@@ -244,7 +321,7 @@ function EventCard({ event, myBet, onBet, onSpend, points }) {
           >
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted flex-1">
-                {CHOICES.find((c) => c.key === selChoice)?.label} · 배당 {event.odds[selChoice].toFixed(1)}배
+                {choices.find((c) => c.key === selChoice)?.label} · 배당 {event.odds[selChoice].toFixed(1)}배
               </span>
               <span className="text-[10px] text-muted">최소 {MIN_BET}P</span>
             </div>
@@ -295,7 +372,7 @@ function EventCard({ event, myBet, onBet, onSpend, points }) {
 
 // ── 메인 컴포넌트 ──────────────────────────────────────────────────────────────
 export function PredictionPanel({ points, onSpend }) {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('open');
   const [myBets, setMyBets] = useState({});
 
   const handleBet = (eventId, bet) => {
@@ -303,16 +380,18 @@ export function PredictionPanel({ points, onSpend }) {
   };
 
   const FILTER_TABS = [
-    { key: 'all',     label: '전체' },
     { key: 'open',    label: '진행 중' },
     { key: 'settled', label: '정산 완료' },
+    { key: 'all',     label: '전체' },
   ];
 
   const filtered = filter === 'all'
     ? EVENTS
     : EVENTS.filter((e) => e.status === filter);
 
-  const myWins   = Object.entries(myBets).filter(([id, b]) => {
+  const openCount = EVENTS.filter((e) => e.status === 'open').length;
+
+  const myWins = Object.entries(myBets).filter(([id, b]) => {
     const ev = EVENTS.find((e) => e.id === Number(id));
     return ev?.status === 'settled' && ev.result === b.choice;
   });
@@ -324,16 +403,47 @@ export function PredictionPanel({ points, onSpend }) {
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-accent mb-1">Match Prediction</p>
-          <h2 className="text-2xl font-black text-text">승부 예측</h2>
-          <p className="text-xs text-muted mt-1">
-            경기 결과를 예측하고 포인트를 획득하세요 · 고정 배당제 · 최소 {MIN_BET}P
-          </p>
+      <section
+        className="relative rounded-2xl overflow-hidden p-5 md:p-6 border"
+        style={{
+          background: 'linear-gradient(135deg, #0a1628 0%, #0d1f2e 55%, #101a30 100%)',
+          borderColor: 'rgba(96,165,250,0.25)',
+        }}
+      >
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 90% 10%, rgba(96,165,250,0.15) 0%, transparent 55%)' }}
+        />
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-sky-400/90 mb-1">World Cup Prediction</p>
+            <h2 className="text-2xl font-black text-text">승부 예측</h2>
+            <p className="text-xs text-muted mt-1 max-w-xl">
+              운영자가 지정한 <b className="text-text">실제 축구 경기</b> 결과를 예측합니다.
+              현재 <b className="text-text">2026 FIFA 월드컵</b> 경기가 오픈되어 있습니다. (FC 리그 경기 아님)
+            </p>
+          </div>
+          <div
+            className="px-4 py-3 rounded-xl shrink-0 text-center"
+            style={{ background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.25)' }}
+          >
+            <p className="text-[10px] text-muted">예측 가능 경기</p>
+            <p className="text-2xl font-black text-sky-300">{openCount}경기</p>
+          </div>
         </div>
-        {/* 내 예측 요약 */}
+      </section>
+
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div
+          className="rounded-xl px-4 py-3 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-muted flex-1"
+          style={{ background: 'rgba(0,217,126,0.05)', border: '1px solid rgba(0,217,126,0.15)' }}
+        >
+          <span>📌 <b className="text-text">고정 배당제</b> — 예측 시점 배당 고정</span>
+          <span>📌 획득 = <b className="text-text">floor(참여P × 배당)</b></span>
+          <span>📌 <b className="text-text">최소 {MIN_BET}P</b> 이상 참여</span>
+          <span>📌 예측 확정 후 변경 불가</span>
+        </div>
+
         <div
           className="flex gap-4 px-4 py-3 rounded-xl shrink-0"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid #1e2d45' }}
@@ -351,18 +461,6 @@ export function PredictionPanel({ points, onSpend }) {
         </div>
       </div>
 
-      {/* 규칙 안내 */}
-      <div
-        className="rounded-xl px-4 py-3 flex flex-wrap gap-4 text-[11px] text-muted"
-        style={{ background: 'rgba(0,217,126,0.05)', border: '1px solid rgba(0,217,126,0.15)' }}
-      >
-        <span>📌 <b className="text-text">고정 배당제</b> — 예측 시점 배당 고정</span>
-        <span>📌 획득 = <b className="text-text">floor(참여P × 배당)</b></span>
-        <span>📌 <b className="text-text">최소 {MIN_BET}P</b> 이상 참여</span>
-        <span>📌 예측 확정 후 변경 불가</span>
-      </div>
-
-      {/* 필터 탭 */}
       <div className="flex gap-1 border-b border-border pb-0">
         {FILTER_TABS.map(({ key, label }) => (
           <button
@@ -389,7 +487,6 @@ export function PredictionPanel({ points, onSpend }) {
         ))}
       </div>
 
-      {/* 이벤트 카드 그리드 */}
       {filtered.length === 0 ? (
         <div className="py-16 text-center text-muted text-sm">해당 상태의 예측 이벤트가 없습니다</div>
       ) : (
