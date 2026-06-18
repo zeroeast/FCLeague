@@ -1,6 +1,45 @@
 import { Link } from 'react-router-dom';
 import { Emblem } from '../components/Emblem.jsx';
 import { PlayerName } from '../components/PlayerName.jsx';
+import { SeasonIcon } from '../components/SeasonIcon.jsx';
+import { SEASON_ICONS } from '../constants/seasonTags.js';
+
+const GAME_MODES = [
+  {
+    id: 'classic',
+    label: '클래식',
+    icon: '⚽',
+    accent: '#00d97e',
+    glowColor: 'rgba(0,217,126,0.18)',
+    borderColor: 'rgba(0,217,126,0.35)',
+  },
+  {
+    id: 'longshot',
+    label: '중거리 모드',
+    icon: '🎯',
+    accent: '#60a5fa',
+    glowColor: 'rgba(96,165,250,0.18)',
+    borderColor: 'rgba(96,165,250,0.35)',
+  },
+  {
+    id: 'norule',
+    label: '노룰모드',
+    icon: '🔥',
+    accent: '#f87171',
+    glowColor: 'rgba(248,113,113,0.18)',
+    borderColor: 'rgba(248,113,113,0.35)',
+  },
+  {
+    id: 'heading',
+    label: '헤딩모드',
+    icon: '🦅',
+    accent: '#c084fc',
+    glowColor: 'rgba(192,132,252,0.18)',
+    borderColor: 'rgba(192,132,252,0.35)',
+  },
+];
+
+const MODE_DESC = 'FC 온라인 스페셜 모드 룰로 경기를 진행합니다';
 
 const STANDINGS = [
   { rank:1, name:'영동',  w:9, d:1, l:0, gf:34, ga:8,  pts:28 },
@@ -42,7 +81,85 @@ export default function Home() {
   return (
     <div className="space-y-6">
 
-      {/* 리그 현황판 */}
+      {/* ── 이번 시즌 게임 모드 ── */}
+      <section
+        className="relative rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #0a1628 0%, #0d1f2e 60%, #101a30 100%)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        {/* 배경 광원 */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 80% 0%, rgba(96,165,250,0.07) 0%, transparent 55%)' }} />
+
+        <div className="relative px-6 pt-6 pb-5">
+
+          {/* 헤더 */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg font-black text-text tracking-tight">이번 시즌 게임 모드</span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold"
+                style={{ background: 'rgba(0,217,126,0.12)', color: '#00d97e', border: '1px solid rgba(0,217,126,0.3)' }}>
+                시즌 1
+              </span>
+            </div>
+            <span className="text-xs text-muted">총 4종 모드</span>
+          </div>
+
+          {/* 게임 모드 카드 4종 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {GAME_MODES.map((mode) => (
+              <div
+                key={mode.id}
+                className="relative rounded-xl p-4 flex flex-col items-center text-center group cursor-default"
+                style={{
+                  background: `linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)`,
+                  border: `1px solid ${mode.borderColor}`,
+                  boxShadow: `0 0 18px ${mode.glowColor}`,
+                }}
+              >
+                {/* 아이콘 glow circle */}
+                <div
+                  className="flex items-center justify-center w-14 h-14 rounded-full mb-3 text-3xl"
+                  style={{ background: mode.glowColor, border: `1px solid ${mode.borderColor}` }}
+                >
+                  {mode.icon}
+                </div>
+                <p className="font-black text-sm mb-1.5" style={{ color: mode.accent }}>
+                  {mode.label}
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(148,163,184,0.75)' }}>
+                  {MODE_DESC}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* 구분선 */}
+          <div className="border-t mb-4" style={{ borderColor: 'rgba(255,255,255,0.07)' }} />
+
+          {/* 활성 카드시즌 */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <span className="text-xs font-bold uppercase tracking-widest shrink-0"
+              style={{ color: 'rgba(148,163,184,0.6)' }}>
+              활성 카드시즌
+            </span>
+            <div className="flex items-center gap-3 flex-wrap">
+              {SEASON_ICONS.map((s) => (
+                <div key={s.code} className="flex items-center gap-1.5 group">
+                  <SeasonIcon cardSeason={s.code} size="lg" showCodeFallback />
+                  <span className="text-xs font-bold" style={{ color: 'rgba(148,163,184,0.8)' }}>
+                    {s.code}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 리그 현황판 ── */}
       <section className="relative rounded-2xl overflow-hidden p-6"
         style={{ background:'linear-gradient(135deg, #0d1526 0%, #0d1f20 100%)', border:'1px solid rgba(0,217,126,0.25)' }}>
         <div className="absolute inset-0 pointer-events-none"
